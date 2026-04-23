@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drawing Idea Generator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.08) 0%, transparent 70%);
+    color: #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .container {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 600px;
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  }
+
+  .prompt-box {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(236, 72, 153, 0.1));
+    border-radius: 12px;
+    padding: 30px 24px;
+    text-align: center;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    position: relative;
+  }
+
+  .prompt-label {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 11px;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  #prompt {
+    font-size: clamp(18px, 3.5vw, 24px);
+    font-weight: 600;
+    color: #f1f5f9;
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+
+  .button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    flex: 1;
+    min-width: 120px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  button:hover { transform: translateY(-2px); }
+  button:active { transform: translateY(0); }
+
+  .btn-main {
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    font-size: 16px;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+  }
+  .btn-main:hover { box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5); }
+
+  .btn-easy {
+    background: rgba(34, 211, 238, 0.15);
+    color: #22d3ee;
+    border: 1px solid rgba(34, 211, 238, 0.3);
+  }
+  .btn-easy:hover { background: rgba(34, 211, 238, 0.25); }
+
+  .btn-wild {
+    background: rgba(236, 72, 153, 0.15);
+    color: #f472b6;
+    border: 1px solid rgba(236, 72, 153, 0.3);
+  }
+  .btn-wild:hover { background: rgba(236, 72, 153, 0.25); }
+
+  .slots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .slot {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slot::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .slot-1::before { background: linear-gradient(90deg, #22d3ee, transparent); }
+  .slot-2::before { background: linear-gradient(90deg, #a78bfa, transparent); }
+  .slot-3::before { background: linear-gradient(90deg, #ec4899, transparent); }
+
+  .slot-label {
+    font-size: 10px;
+    color: #64748b;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .slot-value {
+    font-size: clamp(12px, 2.2vw, 15px);
+    font-weight: 600;
+    color: #e2e8f0;
+    word-wrap: break-word;
+  }
+
+  .counter {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .counter-num {
+    color: #22d3ee;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .pulse { animation: pulse 0.5s ease; }
+
+  @keyframes pulse {
+    0% { transform: scale(1); border-color: rgba(148, 163, 184, 0.15); }
+    50% { transform: scale(1.03); border-color: rgba(167, 139, 250, 0.6); }
+    100% { transform: scale(1); border-color: rgba(148, 163, 184, 0.15); }
+  }
+
+  @media (max-width: 500px) {
+    .slots { grid-template-columns: 1fr; }
+    .container { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<a href="index.html" style="position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-size: 14px; font-family: Segoe UI, sans-serif;" onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#64748b'">← Back to dashboard</a>
+
+
+<h1 class="title">Drawing Idea Generator</h1>
+<p class="subtitle">Hit the button. Draw what you get.</p>
+
+<div class="container">
+  <div class="prompt-box">
+    <span class="prompt-label">Your mission</span>
+    <p id="prompt">Press the button to generate an idea</p>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-main" onclick="generate('normal')">Generate Idea</button>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-easy" onclick="generate('easy')">Easy Mode</button>
+    <button class="btn-wild" onclick="generate('wild')">Wild Mode</button>
+  </div>
+
+  <div class="slots">
+    <div class="slot slot-1" id="slot1">
+      <div class="slot-label">Subject</div>
+      <div class="slot-value" id="slot-subject">—</div>
+    </div>
+    <div class="slot slot-2" id="slot2">
+      <div class="slot-label">Wearing</div>
+      <div class="slot-value" id="slot-outfit">—</div>
+    </div>
+    <div class="slot slot-3" id="slot3">
+      <div class="slot-label">Doing</div>
+      <div class="slot-value" id="slot-action">—</div>
+    </div>
+  </div>
+
+  <div class="counter">
+    Ideas generated: <span class="counter-num" id="counter">0</span>
+  </div>
+</div>
+
+<script>
+  const subjects = {
+    easy: ["cat", "dog", "fox", "wolf", "owl", "shark", "raven", "tiger", "panther", "falcon", "lizard", "bear"],
+    normal: ["giraffe", "octopus", "penguin", "hedgehog", "platypus", "chameleon", "narwhal", "sloth", "axolotl", "capybara", "flamingo", "walrus", "raptor", "phoenix", "griffin"],
+    wild: ["cyber ninja", "grumpy dragon", "battle robot", "ghost pirate", "time-traveling pigeon", "retired unicorn", "shadow assassin", "alien tourist", "undead astronaut", "cursed wizard"]
+  };
+
+  const outfits = {
+    easy: ["a hoodie", "aviator goggles", "sunglasses", "headphones", "a backwards cap", "a leather jacket", "a cape", "combat boots"],
+    normal: ["a space helmet", "samurai armour", "rollerskates", "a wizard robe", "a cowboy hat", "a scuba suit", "cyberpunk shades", "a superhero cape", "a chef's hat", "ninja gear"],
+    wild: ["armour made of spoons", "a jacket of shadows", "seventeen mismatched gauntlets", "a cloak of storms", "crystal shoulderpads", "a hat made of lightning", "disco battle gear"]
+  };
+
+  const actions = {
+    easy: ["eating pizza", "riding a skateboard", "drinking an energy drink", "reading a comic", "playing guitar", "dunking a basketball", "skateboarding a halfpipe", "solving a Rubik's cube"],
+    normal: ["conducting an orchestra", "surfing a giant leaf", "painting a sunset", "building a Mars base", "hosting a game show", "speedrunning a dungeon", "flying a paper plane", "hunting treasure"],
+    wild: ["arguing with a houseplant", "composing metal for worms", "running an underwater arcade", "DJing for ghosts", "writing graffiti on clouds", "knitting armour for rocks", "teaching fish to breakdance"]
+  };
+
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  let count = 0;
+
+  function generate(mode) {
+    let s, o, a;
+    if (mode === "easy") {
+      s = pick(subjects.easy);
+      o = pick(outfits.easy);
+      a = pick(actions.easy);
+    } else if (mode === "wild") {
+      s = pick([...subjects.normal, ...subjects.wild]);
+      o = pick([...outfits.normal, ...outfits.wild]);
+      a = pick([...actions.normal, ...actions.wild]);
+    } else {
+      s = pick([...subjects.easy, ...subjects.normal]);
+      o = pick([...outfits.easy, ...outfits.normal]);
+      a = pick([...actions.easy, ...actions.normal]);
+    }
+
+    const article = /^[aeiou]/i.test(s) ? "an" : "a";
+    document.getElementById("prompt").textContent = `Draw ${article} ${s} wearing ${o}, ${a}.`;
+    document.getElementById("slot-subject").textContent = s;
+    document.getElementById("slot-outfit").textContent = o;
+    document.getElementById("slot-action").textContent = a;
+
+    count++;
+    document.getElementById("counter").textContent = count;
+
+    ["slot1", "slot2", "slot3"].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.remove("pulse");
+      setTimeout(() => el.classList.add("pulse"), i * 80);
+    });
+  }
+</script>
+
+</body>
+</html>

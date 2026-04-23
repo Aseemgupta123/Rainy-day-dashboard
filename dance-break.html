@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dance Break</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
+    color: #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .back { position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #22d3ee; }
+  .title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { text-align: center; color: #64748b; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; }
+  .container { max-width: 500px; width: 100%; }
+  .challenge-box {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(236, 72, 153, 0.1));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 30px 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #challenge {
+    font-size: clamp(18px, 3.5vw, 24px);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .timer-box {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .time {
+    font-size: clamp(60px, 15vw, 100px);
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .time.pulse { animation: pulse 1s ease infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .time-label { color: #64748b; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  button {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s;
+  }
+  button:hover { transform: translateY(-2px); }
+  .btn-start { background: linear-gradient(135deg, #6366f1, #ec4899); }
+  .btn-new { background: rgba(34, 211, 238, 0.15); color: #22d3ee; border: 1px solid rgba(34, 211, 238, 0.3); }
+  .btn-new:hover { background: rgba(34, 211, 238, 0.25); }
+  .duration {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .duration button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+  }
+  .duration button.active { background: rgba(167, 139, 250, 0.2); border-color: #a78bfa; color: #a78bfa; }
+</style>
+</head>
+<body>
+<a href="index.html" class="back">← Back to dashboard</a>
+<h1 class="title">Dance Break</h1>
+<p class="subtitle">Get up. Get moving.</p>
+<div class="container">
+  <div class="challenge-box">
+    <div id="challenge">Press "New Challenge" to start</div>
+  </div>
+
+  <div class="duration">
+    <button onclick="setDuration(30, this)">30s</button>
+    <button onclick="setDuration(60, this)" class="active">60s</button>
+    <button onclick="setDuration(90, this)">90s</button>
+    <button onclick="setDuration(120, this)">2 min</button>
+  </div>
+
+  <div class="timer-box">
+    <div class="time" id="time">1:00</div>
+    <div class="time-label">Time left</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-new" onclick="newChallenge()">New Challenge</button>
+    <button class="btn-start" id="start-btn" onclick="toggleTimer()">Start</button>
+  </div>
+</div>
+<script>
+  const challenges = [
+    "Dance like a robot for the whole time",
+    "Do star jumps!",
+    "Dance like nobody is watching",
+    "Freeze when the timer hits halfway",
+    "Pretend you're swimming in the air",
+    "Do the chicken dance",
+    "Move only your arms — no feet!",
+    "Pretend you're a ninja in slow motion",
+    "Dance like you're underwater",
+    "Do the floss dance",
+    "Hop on one foot, then switch",
+    "Pretend you're a DJ dropping a beat",
+    "Spin in circles (carefully!)",
+    "Do the worm on the floor",
+    "Dance like you're in a music video",
+    "Move like a superhero mid-fight",
+    "Do a silly walk across the room",
+    "Pretend you're riding a horse",
+    "Dance like a rockstar with an air guitar",
+    "Do yoga poses as fast as you can",
+    "Pretend you're stuck in slow motion",
+    "Dance with only your head moving",
+    "Jump as high as you can, over and over",
+    "Do the sprinkler dance",
+    "Pretend you're a cat stretching",
+    "March like a soldier",
+    "Do squats while singing your favourite song",
+    "Dance the whole time without stopping"
+  ];
+
+  let duration = 60;
+  let remaining = 60;
+  let interval = null;
+  let running = false;
+
+  function newChallenge() {
+    document.getElementById("challenge").textContent =
+      challenges[Math.floor(Math.random() * challenges.length)];
+  }
+
+  function setDuration(d, btn) {
+    if (running) return;
+    duration = d;
+    remaining = d;
+    updateDisplay();
+    document.querySelectorAll(".duration button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  }
+
+  function updateDisplay() {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    document.getElementById("time").textContent = `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById("start-btn");
+    const timeEl = document.getElementById("time");
+    if (running) {
+      clearInterval(interval);
+      running = false;
+      btn.textContent = "Start";
+      timeEl.classList.remove("pulse");
+    } else {
+      if (remaining === 0) remaining = duration;
+      running = true;
+      btn.textContent = "Stop";
+      timeEl.classList.add("pulse");
+      interval = setInterval(() => {
+        remaining--;
+        updateDisplay();
+        if (remaining <= 0) {
+          clearInterval(interval);
+          running = false;
+          btn.textContent = "Start";
+          timeEl.classList.remove("pulse");
+          document.getElementById("challenge").textContent = "🎉 Great dancing! Press New Challenge to go again.";
+          remaining = duration;
+          setTimeout(updateDisplay, 2000);
+        }
+      }, 1000);
+    }
+  }
+  updateDisplay();
+</script>
+</body>
+</html>

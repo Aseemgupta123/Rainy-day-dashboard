@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scavenger Hunt</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
+    color: #e2e8f0;
+    padding: 20px;
+  }
+  .back { position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #22d3ee; }
+  .wrap { max-width: 600px; margin: 30px auto 0; }
+  .title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { text-align: center; color: #64748b; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+  button {
+    display: block;
+    margin: 0 auto 20px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  button:hover { transform: translateY(-2px); }
+  .list {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: rgba(167, 139, 250, 0.08); }
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #64748b;
+    border-radius: 6px;
+    margin-right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .item.done .checkbox {
+    background: #22d3ee;
+    border-color: #22d3ee;
+  }
+  .item.done .checkbox::after {
+    content: "✓";
+    color: #0f1624;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .item.done .text { text-decoration: line-through; color: #64748b; }
+  .text { font-size: 16px; }
+  .progress {
+    text-align: center;
+    margin-top: 16px;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .progress-num { color: #22d3ee; font-weight: 700; font-size: 14px; }
+  .celebrate {
+    text-align: center;
+    font-size: 20px;
+    color: #a78bfa;
+    margin-top: 16px;
+    font-weight: 600;
+    min-height: 30px;
+  }
+</style>
+</head>
+<body>
+<a href="index.html" class="back">← Back to dashboard</a>
+<div class="wrap">
+  <h1 class="title">Scavenger Hunt</h1>
+  <p class="subtitle">Find 8 things around the house</p>
+  <button onclick="newHunt()">New Hunt</button>
+  <div class="list" id="list">
+    <p style="text-align: center; color: #64748b; padding: 20px;">Press "New Hunt" to start</p>
+  </div>
+  <div class="progress">Found: <span class="progress-num" id="progress">0 / 0</span></div>
+  <div class="celebrate" id="celebrate"></div>
+</div>
+<script>
+  const items = [
+    "something soft", "something that makes noise", "something red",
+    "something round", "something with your name on it", "something older than you",
+    "something blue", "a spoon", "a book with a picture on the cover",
+    "something made of wood", "a pair of socks that don't match", "something shiny",
+    "something you can see through", "a piece of fruit", "something with a zip",
+    "something that starts with the letter S", "a coin", "a picture of an animal",
+    "something yellow", "a hat", "something bendy", "something that smells nice",
+    "a teddy or stuffed toy", "something smaller than your thumb", "a pencil",
+    "something green", "a feather or something fluffy", "something with 4 legs",
+    "something stripy", "a piece of paper with writing on it", "something cold to touch",
+    "something you can fold", "a sticker", "something that rolls", "a rubber band",
+    "something heart-shaped", "a button", "something purple", "something squishy"
+  ];
+
+  let huntList = [];
+
+  function newHunt() {
+    const shuffled = [...items].sort(() => Math.random() - 0.5).slice(0, 8);
+    huntList = shuffled.map(item => ({ text: item, done: false }));
+    render();
+    document.getElementById("celebrate").textContent = "";
+  }
+
+  function toggle(i) {
+    huntList[i].done = !huntList[i].done;
+    render();
+  }
+
+  function render() {
+    const listEl = document.getElementById("list");
+    listEl.innerHTML = huntList.map((item, i) => `
+      <div class="item ${item.done ? 'done' : ''}" onclick="toggle(${i})">
+        <div class="checkbox"></div>
+        <div class="text">${item.text}</div>
+      </div>
+    `).join("");
+    const done = huntList.filter(i => i.done).length;
+    document.getElementById("progress").textContent = `${done} / ${huntList.length}`;
+    if (done === huntList.length && huntList.length > 0) {
+      document.getElementById("celebrate").textContent = "🎉 You found them all!";
+    }
+  }
+</script>
+</body>
+</html>

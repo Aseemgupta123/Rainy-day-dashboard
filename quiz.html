@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
+    color: #e2e8f0;
+    padding: 20px;
+  }
+  .back { position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #22d3ee; }
+  .wrap { max-width: 600px; margin: 30px auto 0; }
+  .title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { text-align: center; color: #64748b; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+  .card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .category {
+    font-size: 11px;
+    color: #22d3ee;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .question {
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  .answers { display: grid; gap: 10px; }
+  .answer {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    color: #e2e8f0;
+    text-align: left;
+    transition: all 0.2s;
+  }
+  .answer:hover:not(:disabled) { border-color: #a78bfa; background: rgba(167, 139, 250, 0.1); }
+  .answer.correct { background: rgba(34, 211, 238, 0.2); border-color: #22d3ee; color: #22d3ee; }
+  .answer.wrong { background: rgba(236, 72, 153, 0.2); border-color: #ec4899; color: #f472b6; }
+  .answer:disabled { cursor: default; }
+  button.next {
+    width: 100%;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  button.next:hover { transform: translateY(-2px); }
+  .score {
+    text-align: center;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .score-num { color: #22d3ee; font-weight: 700; font-size: 14px; }
+</style>
+</head>
+<body>
+<a href="index.html" class="back">← Back to dashboard</a>
+<div class="wrap">
+  <h1 class="title">Quick Quiz</h1>
+  <p class="subtitle">How many can you get right?</p>
+  <div class="card">
+    <div class="category" id="category">—</div>
+    <div class="question" id="question">Press "Start" to begin</div>
+    <div class="answers" id="answers"></div>
+  </div>
+  <button class="next" onclick="nextQuestion()">Start</button>
+  <div class="score">Score: <span class="score-num" id="score">0 / 0</span></div>
+</div>
+<script>
+  const questions = [
+    { cat: "Animals", q: "Which animal is the fastest on land?", a: ["Cheetah", "Lion", "Horse", "Kangaroo"], correct: 0 },
+    { cat: "Animals", q: "How many legs does a spider have?", a: ["6", "8", "10", "12"], correct: 1 },
+    { cat: "Animals", q: "What do pandas mostly eat?", a: ["Fish", "Bamboo", "Berries", "Insects"], correct: 1 },
+    { cat: "Animals", q: "What is a baby kangaroo called?", a: ["Cub", "Kit", "Joey", "Pup"], correct: 2 },
+    { cat: "Space", q: "Which planet is known as the Red Planet?", a: ["Venus", "Jupiter", "Mars", "Saturn"], correct: 2 },
+    { cat: "Space", q: "How many planets are in our solar system?", a: ["7", "8", "9", "10"], correct: 1 },
+    { cat: "Space", q: "What is the biggest planet?", a: ["Earth", "Saturn", "Jupiter", "Neptune"], correct: 2 },
+    { cat: "Space", q: "What star is closest to Earth?", a: ["North Star", "The Sun", "Sirius", "Alpha Centauri"], correct: 1 },
+    { cat: "Geography", q: "Which is the longest river in the world?", a: ["Amazon", "Nile", "Thames", "Mississippi"], correct: 1 },
+    { cat: "Geography", q: "What is the capital of France?", a: ["London", "Rome", "Paris", "Berlin"], correct: 2 },
+    { cat: "Geography", q: "Which continent is Egypt in?", a: ["Asia", "Africa", "Europe", "Australia"], correct: 1 },
+    { cat: "Geography", q: "What's the tallest mountain in the world?", a: ["Mount Everest", "K2", "Mont Blanc", "Kilimanjaro"], correct: 0 },
+    { cat: "Science", q: "What do bees make?", a: ["Silk", "Honey", "Milk", "Wax only"], correct: 1 },
+    { cat: "Science", q: "What gas do plants breathe in?", a: ["Oxygen", "Nitrogen", "Carbon dioxide", "Helium"], correct: 2 },
+    { cat: "Science", q: "How many bones are in an adult human body?", a: ["106", "206", "306", "406"], correct: 1 },
+    { cat: "Science", q: "What is H2O better known as?", a: ["Salt", "Water", "Sugar", "Hydrogen"], correct: 1 },
+    { cat: "History", q: "Who painted the Mona Lisa?", a: ["Van Gogh", "Picasso", "Da Vinci", "Michelangelo"], correct: 2 },
+    { cat: "History", q: "What did the Egyptians build to bury their pharaohs?", a: ["Castles", "Pyramids", "Towers", "Temples only"], correct: 1 },
+    { cat: "History", q: "What were the Vikings famous for?", a: ["Farming", "Sailing and raiding", "Building castles", "Making pottery"], correct: 1 },
+    { cat: "Maths", q: "What is 7 × 8?", a: ["54", "56", "58", "64"], correct: 1 },
+    { cat: "Maths", q: "How many sides does a hexagon have?", a: ["5", "6", "7", "8"], correct: 1 },
+    { cat: "Maths", q: "What is half of 150?", a: ["50", "70", "75", "80"], correct: 2 },
+    { cat: "UK", q: "What is the capital of Scotland?", a: ["Glasgow", "Edinburgh", "Dundee", "Aberdeen"], correct: 1 },
+    { cat: "UK", q: "Which river runs through London?", a: ["Severn", "Thames", "Mersey", "Tyne"], correct: 1 },
+    { cat: "UK", q: "What's the tallest building in the UK?", a: ["The Shard", "Big Ben", "Canary Wharf", "The Gherkin"], correct: 0 },
+    { cat: "Random", q: "How many colours are in a rainbow?", a: ["5", "6", "7", "8"], correct: 2 },
+    { cat: "Random", q: "What's the largest ocean?", a: ["Atlantic", "Indian", "Arctic", "Pacific"], correct: 3 },
+    { cat: "Random", q: "What is the hardest natural substance?", a: ["Gold", "Iron", "Diamond", "Steel"], correct: 2 }
+  ];
+
+  let pool = [];
+  let current = null;
+  let score = 0;
+  let answered = 0;
+
+  function nextQuestion() {
+    if (pool.length === 0) pool = [...questions].sort(() => Math.random() - 0.5);
+    current = pool.pop();
+    document.getElementById("category").textContent = current.cat;
+    document.getElementById("question").textContent = current.q;
+    const answersEl = document.getElementById("answers");
+    answersEl.innerHTML = current.a.map((ans, i) =>
+      `<button class="answer" onclick="pick(${i})">${ans}</button>`
+    ).join("");
+    document.querySelector("button.next").textContent = "Next question";
+  }
+
+  function pick(i) {
+    const btns = document.querySelectorAll(".answer");
+    btns.forEach((b, idx) => {
+      b.disabled = true;
+      if (idx === current.correct) b.classList.add("correct");
+      else if (idx === i) b.classList.add("wrong");
+    });
+    if (i === current.correct) score++;
+    answered++;
+    document.getElementById("score").textContent = `${score} / ${answered}`;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rainy Day Family Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.08) 0%, transparent 70%);
+    color: #e2e8f0;
+    padding: 40px 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .rain-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .title {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #64748b;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .date {
+    color: #94a3b8;
+    margin-top: 12px;
+    font-size: 15px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .tile {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    display: block;
+  }
+
+  .tile::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    opacity: 0.8;
+  }
+
+  .tile:hover {
+    transform: translateY(-4px);
+    border-color: rgba(167, 139, 250, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .tile:hover::before { opacity: 1; }
+
+  .tile-1::before { background: linear-gradient(90deg, #22d3ee, #6366f1); }
+  .tile-2::before { background: linear-gradient(90deg, #a78bfa, #ec4899); }
+  .tile-3::before { background: linear-gradient(90deg, #ec4899, #f59e0b); }
+  .tile-4::before { background: linear-gradient(90deg, #22d3ee, #10b981); }
+  .tile-5::before { background: linear-gradient(90deg, #f59e0b, #ec4899); }
+  .tile-6::before { background: linear-gradient(90deg, #6366f1, #22d3ee); }
+
+  .tile-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .tile-category {
+    font-size: 11px;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .tile-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #f1f5f9;
+  }
+
+  .tile-description {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+
+  .tile-arrow {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    color: #64748b;
+    font-size: 18px;
+    transition: all 0.2s;
+  }
+
+  .tile:hover .tile-arrow {
+    color: #a78bfa;
+    transform: translate(3px, -3px);
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="rain-icon">🌧️</div>
+  <h1 class="title">Rainy Day Dashboard</h1>
+  <p class="subtitle">Family edition</p>
+  <p class="date" id="date"></p>
+</div>
+
+<div class="grid">
+
+  <a href="drawing-prompt.html" class="tile tile-1">
+    <span class="tile-arrow">↗</span>
+    <div class="tile-icon">🎨</div>
+    <div class="tile-category">Creative</div>
+    <div class="tile-title">Drawing Ideas</div>
+    <div class="tile-description">Get a silly drawing prompt. Grab pens and paper.</div>
+  </a>
+
+  <a href="story-starter.html" class="tile tile-2">
+    <span class="tile-arrow">↗</span>
+    <div class="tile-icon">📖</div>
+    <div class="tile-category">Creative</div>
+    <div class="tile-title">Story Starter</div>
+    <div class="tile-description">An opening line to kick off a story. What happens next?</div>
+  </a>
+
+  <a href="would-you-rather.html" class="tile tile-3">
+    <span class="tile-arrow">↗</span>
+    <div class="tile-icon">🤔</div>
+    <div class="tile-category">Games</div>
+    <div class="tile-title">Would You Rather?</div>
+    <div class="tile-description">Silly questions with tough choices. Play together.</div>
+  </a>
+
+  <a href="scavenger-hunt.html" class="tile tile-4">
+    <span class="tile-arrow">↗</span>
+    <div class="tile-icon">🔍</div>
+    <div class="tile-category">Games</div>
+    <div class="tile-title">Scavenger Hunt</div>
+    <div class="tile-description">Find 8 random things around the house. Tick them off.</div>
+  </a>
+
+  <a href="quiz.html" class="tile tile-5">
+    <span class="tile-arrow">↗</span>
+    <div class="tile-icon">🧠</div>
+    <div class="tile-category">Learning</div>
+    <div class="tile-title">Quick Quiz</div>
+    <div class="tile-description">Test your trivia — animals, space, maths and more.</div>
+  </a>
+
+  <a href="dance-break.html" class="tile tile-6">
+    <span class="tile-arrow">↗</span>
+    <div class="tile-icon">💃</div>
+    <div class="tile-category">Active</div>
+    <div class="tile-title">Dance Break</div>
+    <div class="tile-description">Silly challenges and a timer. Get the wiggles out.</div>
+  </a>
+
+</div>
+
+<div class="footer">
+  Works offline • No accounts • Just fun
+</div>
+
+<script>
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const d = new Date();
+  document.getElementById("date").textContent = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+</script>
+
+</body>
+</html>
