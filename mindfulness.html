@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindfulness Minute</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.12) 0%, transparent 50%);
+    color: #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .back { position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
+  .back:hover { color: #22d3ee; }
+
+  .header {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 32px;
+  }
+
+  .title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .subtitle { color: #64748b; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+
+  /* ── Picker ── */
+  #picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    max-width: 660px;
+    width: 100%;
+  }
+
+  .activity-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+
+  .activity-card:hover {
+    border-color: rgba(34, 211, 238, 0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .activity-emoji { font-size: 38px; margin-bottom: 12px; display: block; }
+  .activity-name { font-size: 17px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  .activity-desc { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+  .activity-meta { font-size: 11px; color: #475569; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ── Exercise ── */
+  #exercise {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .ex-title { font-size: 22px; font-weight: 700; color: #f1f5f9; text-align: center; margin-bottom: 4px; }
+  .ex-sub { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 36px; }
+
+  /* Breathing circle */
+  #circle-wrap {
+    width: 260px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  #breath-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, rgba(34, 211, 238, 0.3), rgba(99, 102, 241, 0.12));
+    border: 2px solid rgba(34, 211, 238, 0.45);
+    box-shadow: 0 0 40px rgba(34, 211, 238, 0.18), inset 0 0 28px rgba(99, 102, 241, 0.1);
+    transform: scale(1);
+  }
+
+  #phase-text {
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 600;
+    color: #e2e8f0;
+    text-align: center;
+    min-height: 38px;
+    margin-bottom: 10px;
+  }
+
+  #round-counter {
+    font-size: 12px;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    min-height: 20px;
+  }
+
+  /* Grounding card */
+  #grounding-ui {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  #grounding-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 16px;
+    padding: 36px 28px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  #grounding-emoji { font-size: 54px; margin-bottom: 14px; display: block; }
+  #grounding-label { font-size: 12px; color: #22d3ee; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  #grounding-prompt { font-size: clamp(18px, 3vw, 22px); font-weight: 600; color: #f1f5f9; line-height: 1.5; }
+  #grounding-hint { font-size: 14px; color: #64748b; margin-top: 10px; line-height: 1.6; }
+
+  /* Buttons */
+  .btn-primary {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, #6366f1, #22d3ee);
+    transition: all 0.2s;
+    width: 100%;
+    max-width: 300px;
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
+  .btn-primary:disabled { opacity: 0.45; cursor: default; }
+
+  .btn-ghost {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 20px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    color: #64748b;
+    background: transparent;
+    transition: all 0.2s;
+    margin-top: 12px;
+  }
+  .btn-ghost:hover { border-color: rgba(167, 139, 250, 0.3); color: #a78bfa; }
+
+  /* Done */
+  #done {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 400px;
+  }
+
+  .done-emoji { font-size: 64px; margin-bottom: 20px; }
+  .done-title { font-size: 28px; font-weight: 800; color: #f1f5f9; margin-bottom: 10px; }
+  .done-text { font-size: 16px; color: #94a3b8; line-height: 1.7; margin-bottom: 28px; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">← Back to dashboard</a>
+
+<div class="header">
+  <h1 class="title">🧘 Mindfulness Minute</h1>
+  <p class="subtitle">Slow down · Breathe · Feel calm</p>
+</div>
+
+<!-- ── Picker ── -->
+<div id="picker">
+  <div class="activity-card" onclick="start('bubble')">
+    <span class="activity-emoji">🫧</span>
+    <div class="activity-name">Bubble Breathing</div>
+    <div class="activity-desc">Breathe in slowly, breathe out slowly. Like blowing the biggest, gentlest bubble.</div>
+    <div class="activity-meta">5 rounds · ~1 min</div>
+  </div>
+
+  <div class="activity-card" onclick="start('box')">
+    <span class="activity-emoji">📦</span>
+    <div class="activity-name">Box Breathing</div>
+    <div class="activity-desc">Breathe in, hold, out, hold — four equal sides. Used by astronauts and athletes!</div>
+    <div class="activity-meta">4 rounds · ~1 min</div>
+  </div>
+
+  <div class="activity-card" onclick="start('grounding')">
+    <span class="activity-emoji">🌿</span>
+    <div class="activity-name">5-4-3-2-1</div>
+    <div class="activity-desc">Use your five senses to feel calm and present. Great when feeling anxious or wound up.</div>
+    <div class="activity-meta">5 steps · go at your pace</div>
+  </div>
+</div>
+
+<!-- ── Exercise ── -->
+<div id="exercise">
+  <div class="ex-title" id="ex-title"></div>
+  <div class="ex-sub" id="ex-sub"></div>
+
+  <!-- Breathing -->
+  <div id="breathing-ui">
+    <div id="phase-text">Press Start when you're ready</div>
+    <div id="circle-wrap">
+      <div id="breath-circle"></div>
+    </div>
+    <div id="round-counter"></div>
+  </div>
+
+  <!-- Grounding -->
+  <div id="grounding-ui">
+    <div id="grounding-card">
+      <span id="grounding-emoji"></span>
+      <div id="grounding-label"></div>
+      <div id="grounding-prompt"></div>
+      <div id="grounding-hint"></div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="action-btn" onclick="handleAction()">Start</button>
+  <button class="btn-ghost" onclick="goBack()">← Choose a different activity</button>
+</div>
+
+<!-- ── Done ── -->
+<div id="done">
+  <div class="done-emoji">🌟</div>
+  <div class="done-title">Well done!</div>
+  <div class="done-text" id="done-text"></div>
+  <button class="btn-primary" onclick="goBack()">Try another activity</button>
+</div>
+
+<script>
+  const activities = {
+    bubble: {
+      name: 'Bubble Breathing',
+      sub: 'Breathe slowly and deeply',
+      rounds: 5,
+      phases: [
+        { text: 'Breathe in...', type: 'inhale', duration: 4000 },
+        { text: 'Breathe out...', type: 'exhale', duration: 4000 },
+      ],
+      done: 'Amazing! You took 5 slow, deep breaths. Your whole body feels that. 💙',
+    },
+    box: {
+      name: 'Box Breathing',
+      sub: '4 seconds each side of the box',
+      rounds: 4,
+      phases: [
+        { text: 'Breathe in...', type: 'inhale', duration: 4000 },
+        { text: 'Hold...', type: 'hold', duration: 4000 },
+        { text: 'Breathe out...', type: 'exhale', duration: 4000 },
+        { text: 'Hold...', type: 'hold', duration: 4000 },
+      ],
+      done: 'You did it! Box breathing is used by astronauts, athletes and surgeons to stay calm. 🚀',
+    },
+  };
+
+  const groundingSteps = [
+    { emoji: '👁️', label: 'Step 1 of 5 — SEE', prompt: 'Find 5 things you can see', hint: 'Look around slowly — colours, shapes, things near and far.' },
+    { emoji: '✋', label: 'Step 2 of 5 — TOUCH', prompt: 'Notice 4 things you can touch', hint: 'Feel your chair, your clothes, the floor, a surface nearby.' },
+    { emoji: '👂', label: 'Step 3 of 5 — HEAR', prompt: 'Listen for 3 things you can hear', hint: 'Close your eyes. What sounds are there right now?' },
+    { emoji: '👃', label: 'Step 4 of 5 — SMELL', prompt: 'Notice 2 things you can smell', hint: 'Take a slow breath in through your nose.' },
+    { emoji: '👅', label: 'Step 5 of 5 — TASTE', prompt: 'Notice 1 thing you can taste', hint: 'Swallow gently and notice any taste in your mouth.' },
+  ];
+
+  let currentActivity = null;
+  let stopped = false;
+  let groundingStep = 0;
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function setCircle(type, duration) {
+    const c = document.getElementById('breath-circle');
+    if (type === 'inhale') {
+      c.style.transition = `transform ${duration}ms ease-in-out, box-shadow ${duration}ms ease-in-out`;
+      c.style.transform = 'scale(1.75)';
+      c.style.boxShadow = '0 0 70px rgba(34,211,238,0.35), inset 0 0 40px rgba(99,102,241,0.2)';
+    } else if (type === 'exhale') {
+      c.style.transition = `transform ${duration}ms ease-in-out, box-shadow ${duration}ms ease-in-out`;
+      c.style.transform = 'scale(1)';
+      c.style.boxShadow = '0 0 40px rgba(34,211,238,0.18), inset 0 0 28px rgba(99,102,241,0.1)';
+    }
+    // hold: no change — circle stays at whatever scale it's at
+  }
+
+  function resetCircle() {
+    const c = document.getElementById('breath-circle');
+    c.style.transition = 'none';
+    c.style.transform = 'scale(1)';
+    c.style.boxShadow = '0 0 40px rgba(34,211,238,0.18), inset 0 0 28px rgba(99,102,241,0.1)';
+  }
+
+  async function runBreathing(activity) {
+    const btn = document.getElementById('action-btn');
+    btn.textContent = 'Running...';
+    btn.disabled = true;
+
+    document.getElementById('phase-text').textContent = 'Get ready...';
+    document.getElementById('round-counter').textContent = '';
+    await sleep(2000);
+
+    for (let round = 0; round < activity.rounds; round++) {
+      if (stopped) return;
+      document.getElementById('round-counter').textContent = `Round ${round + 1} of ${activity.rounds}`;
+      for (const phase of activity.phases) {
+        if (stopped) return;
+        document.getElementById('phase-text').textContent = phase.text;
+        setCircle(phase.type, phase.duration);
+        await sleep(phase.duration);
+      }
+    }
+
+    if (!stopped) showDone(activity.done);
+  }
+
+  function start(id) {
+    currentActivity = id;
+    stopped = false;
+
+    document.getElementById('picker').style.display = 'none';
+    document.getElementById('done').style.display = 'none';
+    document.getElementById('exercise').style.display = 'flex';
+
+    if (id === 'grounding') {
+      document.getElementById('breathing-ui').style.display = 'none';
+      document.getElementById('grounding-ui').style.display = 'flex';
+      document.getElementById('ex-title').textContent = '5-4-3-2-1 Grounding';
+      document.getElementById('ex-sub').textContent = 'Take each step at your own pace';
+      groundingStep = 0;
+      renderGroundingStep();
+    } else {
+      document.getElementById('breathing-ui').style.display = 'block';
+      document.getElementById('grounding-ui').style.display = 'none';
+      const act = activities[id];
+      document.getElementById('ex-title').textContent = act.name;
+      document.getElementById('ex-sub').textContent = act.sub;
+      document.getElementById('phase-text').textContent = 'Press Start when you\'re ready';
+      document.getElementById('round-counter').textContent = '';
+      document.getElementById('action-btn').textContent = 'Start';
+      document.getElementById('action-btn').disabled = false;
+      resetCircle();
+    }
+  }
+
+  function handleAction() {
+    if (currentActivity === 'grounding') {
+      advanceGrounding();
+    } else {
+      runBreathing(activities[currentActivity]);
+    }
+  }
+
+  function renderGroundingStep() {
+    const s = groundingSteps[groundingStep];
+    document.getElementById('grounding-emoji').textContent = s.emoji;
+    document.getElementById('grounding-label').textContent = s.label;
+    document.getElementById('grounding-prompt').textContent = s.prompt;
+    document.getElementById('grounding-hint').textContent = s.hint;
+    const isLast = groundingStep === groundingSteps.length - 1;
+    document.getElementById('action-btn').textContent = isLast ? 'All done ✓' : 'Done ✓ — Next';
+    document.getElementById('action-btn').disabled = false;
+  }
+
+  function advanceGrounding() {
+    groundingStep++;
+    if (groundingStep >= groundingSteps.length) {
+      showDone('You used all five senses to feel calm and present. That\'s a superpower. 🌿');
+    } else {
+      renderGroundingStep();
+    }
+  }
+
+  function showDone(text) {
+    document.getElementById('exercise').style.display = 'none';
+    document.getElementById('done').style.display = 'flex';
+    document.getElementById('done-text').textContent = text;
+  }
+
+  function goBack() {
+    stopped = true;
+    document.getElementById('exercise').style.display = 'none';
+    document.getElementById('done').style.display = 'none';
+    document.getElementById('picker').style.display = 'grid';
+    resetCircle();
+  }
+</script>
+
+</body>
+</html>
