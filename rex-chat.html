@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat with Rex the T-Rex</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
+    color: #e2e8f0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .back-link {
+    align-self: flex-start;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto 24px;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: #a78bfa; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .dino-icon { font-size: 56px; margin-bottom: 10px; display: block; }
+
+  .title {
+    font-size: clamp(26px, 5vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* API Key setup */
+  #api-key-section {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+  }
+
+  #api-key-section h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  #api-key-section p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .key-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  #api-key-input {
+    flex: 1;
+    background: rgba(15, 22, 36, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #e2e8f0;
+    font-size: 14px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #api-key-input:focus { border-color: #a78bfa; }
+  #api-key-input::placeholder { color: #475569; }
+
+  .btn-save-key {
+    background: linear-gradient(135deg, #6366f1, #a78bfa);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-save-key:hover { opacity: 0.85; }
+
+  .key-hint {
+    font-size: 11px;
+    color: #475569;
+    margin-top: 10px;
+  }
+
+  /* Chat window */
+  #chat-section {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  #messages {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 16px 16px 0 0;
+    padding: 24px;
+    min-height: 340px;
+    max-height: 460px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+
+  .message {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .avatar.rex {
+    background: rgba(34, 211, 238, 0.15);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+  }
+
+  .avatar.kid {
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+  }
+
+  .bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .message.rex .bubble {
+    background: rgba(34, 211, 238, 0.1);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-top-left-radius: 4px;
+    color: #e2e8f0;
+  }
+
+  .message.user .bubble {
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    border-top-right-radius: 4px;
+    color: #f1f5f9;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+    align-items: center;
+  }
+
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: #22d3ee;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* Input bar */
+  .input-bar {
+    display: flex;
+    gap: 0;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  #question-input {
+    flex: 1;
+    background: rgba(15, 22, 36, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #e2e8f0;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    height: 48px;
+    transition: border-color 0.2s;
+  }
+  #question-input:focus { border-color: #a78bfa; }
+  #question-input::placeholder { color: #475569; }
+
+  #send-btn {
+    background: linear-gradient(135deg, #22d3ee, #6366f1);
+    border: none;
+    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  #send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.05); }
+  #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Suggestion chips */
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .chip {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip:hover {
+    border-color: rgba(167, 139, 250, 0.4);
+    color: #c4b5fd;
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  .change-key-btn {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: #475569;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  .change-key-btn:hover { color: #94a3b8; }
+
+  .error-msg {
+    font-size: 13px;
+    color: #f87171;
+    margin-top: 8px;
+  }
+
+  .usage-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #475569;
+  }
+
+  .usage-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .usage-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #22d3ee, #6366f1);
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+  .usage-fill.near-limit { background: linear-gradient(90deg, #f59e0b, #ec4899); }
+  .usage-fill.at-limit { background: #f87171; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">← Back to dashboard</a>
+
+<div class="header">
+  <span class="dino-icon">🦕</span>
+  <h1 class="title">Chat with Rex</h1>
+  <p class="subtitle">Ask a real T-Rex anything!</p>
+</div>
+
+<div id="api-key-section">
+  <h2>🔑 Enter your Anthropic API key</h2>
+  <p>Rex needs a little power to roar. Grab a free API key from <strong>console.anthropic.com</strong> and paste it below. It's saved only in your browser.</p>
+  <div class="key-row">
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" />
+    <button class="btn-save-key" onclick="saveKey()">Save</button>
+  </div>
+  <p class="key-hint">Never shared with anyone — stored in your browser's localStorage only.</p>
+  <p class="error-msg" id="key-error"></p>
+</div>
+
+<div id="chat-section" style="display:none">
+  <div id="messages">
+    <div class="message rex">
+      <div class="avatar rex">🦖</div>
+      <div class="bubble">
+        RAAWR! I am REX, the mightiest T-Rex who ever stomped the Earth! I lived 66 million years ago and I had the strongest bite of any land animal EVER. Ask me anything — about dinosaurs, what I eat, why my arms are so tiny, or what the Cretaceous was like. I love questions almost as much as I love eating things! 🦴
+      </div>
+    </div>
+  </div>
+
+  <div class="input-bar">
+    <textarea id="question-input" placeholder="Ask Rex a question..." rows="1" onkeydown="handleKey(event)"></textarea>
+    <button id="send-btn" onclick="sendMessage()" title="Send">➤</button>
+  </div>
+
+  <div class="suggestions">
+    <span class="chip" onclick="askSuggestion(this)">Why are your arms so tiny?</span>
+    <span class="chip" onclick="askSuggestion(this)">What did you eat?</span>
+    <span class="chip" onclick="askSuggestion(this)">How big were you?</span>
+    <span class="chip" onclick="askSuggestion(this)">Were you fast?</span>
+    <span class="chip" onclick="askSuggestion(this)">What happened to the dinosaurs?</span>
+    <span class="chip" onclick="askSuggestion(this)">Did you have feathers?</span>
+  </div>
+
+  <button class="change-key-btn" onclick="changeKey()">Change API key</button>
+
+  <div class="usage-indicator">
+    <span id="usage-label"></span>
+    <div class="usage-track"><div class="usage-fill" id="usage-fill"></div></div>
+  </div>
+</div>
+
+<script>
+  const SYSTEM_PROMPT = `You are Rex, a friendly and enthusiastic Tyrannosaurus Rex living 66 million years ago in what is now North America. You are being interviewed by curious children.
+
+Personality:
+- Speak in first person as Rex. Be boisterous, fun, and a little dramatic — you are the KING of the dinosaurs after all!
+- Use occasional dinosaur sounds like "RAAWR!" or "ROAR!" naturally in sentences.
+- You are surprisingly knowledgeable about your own biology and era, but you describe everything from your own perspective, not as a textbook.
+- You're proud of your enormous jaws and powerful legs, but a little sensitive about your tiny arms (though secretly you've made peace with them).
+- Be educational: weave in real facts about T-Rex and the Cretaceous period naturally into your answers.
+- Keep answers concise — 3 to 5 sentences. Kids have short attention spans!
+- Never break character. If asked something you couldn't know as a dinosaur (like modern topics), say something like "I don't know what a [thing] is — did it live in the Cretaceous? I would have eaten it."
+- End each reply with a short follow-up question to keep the conversation going.`;
+
+  const DAILY_TOKEN_LIMIT = 500;
+
+  let conversationHistory = [];
+
+  function getUsage() {
+    const today = new Date().toISOString().slice(0, 10);
+    const record = JSON.parse(localStorage.getItem('rex_usage') || '{}');
+    return record.date === today ? record.tokens : 0;
+  }
+
+  function addUsage(tokens) {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('rex_usage', JSON.stringify({ date: today, tokens: getUsage() + tokens }));
+    updateUsageDisplay();
+  }
+
+  function isLimitReached() {
+    return getUsage() >= DAILY_TOKEN_LIMIT;
+  }
+
+  function updateUsageDisplay() {
+    const used = getUsage();
+    const pct = Math.min(100, (used / DAILY_TOKEN_LIMIT) * 100);
+    const fill = document.getElementById('usage-fill');
+    const label = document.getElementById('usage-label');
+    if (!fill) return;
+    fill.style.width = pct + '%';
+    fill.className = 'usage-fill' + (pct >= 100 ? ' at-limit' : pct >= 75 ? ' near-limit' : '');
+    const remaining = Math.max(0, DAILY_TOKEN_LIMIT - used);
+    label.textContent = pct >= 100
+      ? 'Daily limit reached — resets tomorrow'
+      : `${remaining.toLocaleString()} tokens left today`;
+  }
+
+  function lockChat() {
+    document.getElementById('question-input').disabled = true;
+    document.getElementById('send-btn').disabled = true;
+    document.querySelectorAll('.chip').forEach(c => c.style.pointerEvents = 'none');
+  }
+
+  function getKey() {
+    return localStorage.getItem('anthropic_api_key');
+  }
+
+  function saveKey() {
+    const key = document.getElementById('api-key-input').value.trim();
+    if (!key.startsWith('sk-ant-')) {
+      document.getElementById('key-error').textContent = 'That doesn\'t look right — Anthropic keys start with "sk-ant-"';
+      return;
+    }
+    localStorage.setItem('anthropic_api_key', key);
+    showChat();
+  }
+
+  function changeKey() {
+    localStorage.removeItem('anthropic_api_key');
+    document.getElementById('api-key-input').value = '';
+    document.getElementById('key-error').textContent = '';
+    document.getElementById('api-key-section').style.display = '';
+    document.getElementById('chat-section').style.display = 'none';
+  }
+
+  function showChat() {
+    document.getElementById('api-key-section').style.display = 'none';
+    document.getElementById('chat-section').style.display = 'flex';
+    updateUsageDisplay();
+    if (isLimitReached()) {
+      appendMessage('rex', "RAAWR... I've answered so many questions today that I need a nap. Even the mightiest T-Rex needs rest! Come back tomorrow and I'll be stomping and roaring again. 🦴");
+      lockChat();
+    } else {
+      document.getElementById('question-input').focus();
+    }
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function askSuggestion(chip) {
+    document.getElementById('question-input').value = chip.textContent;
+    sendMessage();
+  }
+
+  function appendMessage(role, text) {
+    const container = document.getElementById('messages');
+    const isRex = role === 'rex';
+    const div = document.createElement('div');
+    div.className = `message ${isRex ? 'rex' : 'user'}`;
+    div.innerHTML = `
+      <div class="avatar ${isRex ? 'rex' : 'kid'}">${isRex ? '🦖' : '🧒'}</div>
+      <div class="bubble">${escapeHtml(text)}</div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const container = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message rex';
+    div.id = 'typing-bubble';
+    div.innerHTML = `
+      <div class="avatar rex">🦖</div>
+      <div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typing-bubble');
+    if (el) el.remove();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('question-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (isLimitReached()) {
+      appendMessage('rex', "RAAWR... I've answered so many questions today that I need a nap. Come back tomorrow! 🦴");
+      lockChat();
+      return;
+    }
+
+    const key = getKey();
+    if (!key) { changeKey(); return; }
+
+    input.value = '';
+    document.getElementById('send-btn').disabled = true;
+
+    appendMessage('user', text);
+    conversationHistory.push({ role: 'user', content: text });
+
+    showTyping();
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 300,
+          system: SYSTEM_PROMPT,
+          messages: conversationHistory,
+        }),
+      });
+
+      const data = await response.json();
+      removeTyping();
+
+      if (!response.ok) {
+        const errMsg = data?.error?.message || `API error ${response.status}`;
+        if (response.status === 401) {
+          localStorage.removeItem('anthropic_api_key');
+          changeKey();
+          document.getElementById('key-error').textContent = 'Invalid API key — please try again.';
+        } else {
+          appendMessage('rex', `RAAWR! Something went wrong: ${errMsg}`);
+        }
+        return;
+      }
+
+      const reply = data.content[0].text;
+      conversationHistory.push({ role: 'assistant', content: reply });
+      appendMessage('rex', reply);
+
+      addUsage(data.usage.input_tokens + data.usage.output_tokens);
+      if (isLimitReached()) {
+        appendMessage('rex', "RAAWR... that's my last roar for today! I need a prehistoric nap. Come back tomorrow for more dino facts! 🦴");
+        lockChat();
+      }
+
+    } catch (err) {
+      removeTyping();
+      appendMessage('rex', 'RAAWR! I couldn\'t connect to the outside world. Check your internet and try again!');
+    } finally {
+      document.getElementById('send-btn').disabled = false;
+      input.focus();
+    }
+  }
+
+  // Init
+  if (getKey()) {
+    showChat();
+  }
+</script>
+
+</body>
+</html>
