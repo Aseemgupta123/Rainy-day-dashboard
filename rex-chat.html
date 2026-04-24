@@ -409,6 +409,19 @@ Personality:
 - End each reply with a short follow-up question to keep the conversation going.`;
 
   const DAILY_TOKEN_LIMIT = 5000;
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzttJbNF3q3mjzAxAnGq0jxiE1veO3pYbNVL_4NJG1kyDYQFFuLv9xTtZY5nK0vvCDVpg/exec';
+
+  function saveToSheets(question, answer) {
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        timestamp: new Date().toLocaleString(),
+        question,
+        answer
+      })
+    }).catch(() => {});
+  }
 
   let conversationHistory = [];
 
@@ -587,6 +600,7 @@ Personality:
       const reply = data.content[0].text;
       conversationHistory.push({ role: 'assistant', content: reply });
       appendMessage('rex', reply);
+      saveToSheets(text, reply);
 
       addUsage(data.usage.input_tokens + data.usage.output_tokens);
       if (isLimitReached()) {
