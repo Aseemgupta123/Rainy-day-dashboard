@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat with Nature</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    background: #0f1624;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(74, 222, 128, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(251, 191, 36, 0.08) 0%, transparent 50%);
+    color: #e2e8f0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .back-link {
+    align-self: flex-start;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto 24px;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: #4ade80; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .page-icon { font-size: 56px; margin-bottom: 10px; display: block; }
+
+  .title {
+    font-size: clamp(26px, 5vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #4ade80 0%, #22d3ee 40%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Character picker */
+  .character-picker {
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 20px;
+  }
+
+  .picker-label {
+    font-size: 12px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+
+  .character-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 500px) {
+    .character-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .char-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(148, 163, 184, 0.1);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .char-card:hover {
+    background: rgba(30, 41, 59, 0.85);
+    transform: translateY(-2px);
+  }
+
+  .char-card.active {
+    background: rgba(30, 41, 59, 0.9);
+  }
+
+  .char-emoji { font-size: 28px; display: block; margin-bottom: 5px; }
+  .char-name { font-size: 11px; font-weight: 600; color: #64748b; line-height: 1.3; }
+  .char-card.active .char-name { color: #e2e8f0; }
+
+  /* API Key setup */
+  #api-key-section {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+  }
+
+  #api-key-section h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  #api-key-section p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .key-row { display: flex; gap: 8px; }
+
+  #api-key-input {
+    flex: 1;
+    background: rgba(15, 22, 36, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #e2e8f0;
+    font-size: 14px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #api-key-input:focus { border-color: #4ade80; }
+  #api-key-input::placeholder { color: #475569; }
+
+  .btn-save-key {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: #0f1624;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-save-key:hover { opacity: 0.85; }
+
+  .key-hint { font-size: 11px; color: #475569; margin-top: 10px; }
+
+  .error-msg { font-size: 13px; color: #f87171; margin-top: 8px; }
+
+  /* Chat window */
+  #chat-section {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .chat-header-emoji { font-size: 28px; }
+
+  .chat-header-text { flex: 1; }
+  .chat-header-name { font-size: 16px; font-weight: 700; color: #f1f5f9; }
+  .chat-header-sub { font-size: 12px; color: #64748b; margin-top: 1px; }
+
+  #messages {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-top: none;
+    border-bottom: none;
+    padding: 20px;
+    min-height: 320px;
+    max-height: 440px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+
+  .message {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .avatar.nature { border-color: var(--accent-border, rgba(74, 222, 128, 0.3)); background: var(--accent-bg, rgba(74, 222, 128, 0.1)); }
+  .avatar.kid { background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.3); }
+
+  .bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .message.nature .bubble {
+    background: var(--accent-bubble-bg, rgba(74, 222, 128, 0.08));
+    border: 1px solid var(--accent-border, rgba(74, 222, 128, 0.2));
+    border-top-left-radius: 4px;
+    color: #e2e8f0;
+  }
+
+  .message.user .bubble {
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    border-top-right-radius: 4px;
+    color: #f1f5f9;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+    align-items: center;
+  }
+
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-color, #4ade80);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  .input-bar {
+    display: flex;
+    gap: 10px;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: 12px;
+  }
+
+  #question-input {
+    flex: 1;
+    background: rgba(15, 22, 36, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #e2e8f0;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    height: 48px;
+    transition: border-color 0.2s;
+  }
+  #question-input:focus { border-color: var(--accent-color, #4ade80); }
+  #question-input::placeholder { color: #475569; }
+
+  #send-btn {
+    background: var(--accent-gradient, linear-gradient(135deg, #4ade80, #22d3ee));
+    border: none;
+    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  #send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.05); }
+  #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .chip {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip:hover {
+    border-color: var(--accent-color, #4ade80);
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, 0.9);
+  }
+
+  .change-key-btn {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: #475569;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  .change-key-btn:hover { color: #94a3b8; }
+
+  .usage-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #475569;
+  }
+
+  .usage-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .usage-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-gradient, linear-gradient(90deg, #4ade80, #22d3ee));
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+  .usage-fill.near-limit { background: linear-gradient(90deg, #f59e0b, #ec4899); }
+  .usage-fill.at-limit { background: #f87171; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">← Back to dashboard</a>
+
+<div class="header">
+  <span class="page-icon">🌿</span>
+  <h1 class="title">Chat with Nature</h1>
+  <p class="subtitle">Pick a creature or plant to talk to</p>
+</div>
+
+<div class="character-picker">
+  <p class="picker-label">Who do you want to talk to?</p>
+  <div class="character-grid" id="character-grid"></div>
+</div>
+
+<div id="api-key-section">
+  <h2>🔑 Enter your Anthropic API key</h2>
+  <p>Nature needs a little power to speak. Grab a free API key from <strong>console.anthropic.com</strong> and paste it below. It's saved only in your browser.</p>
+  <div class="key-row">
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" />
+    <button class="btn-save-key" onclick="saveKey()">Save</button>
+  </div>
+  <p class="key-hint">Never shared with anyone — stored in your browser's localStorage only.</p>
+  <p class="error-msg" id="key-error"></p>
+</div>
+
+<div id="chat-section" style="display:none">
+  <div class="chat-header">
+    <span class="chat-header-emoji" id="chat-emoji"></span>
+    <div class="chat-header-text">
+      <div class="chat-header-name" id="chat-name"></div>
+      <div class="chat-header-sub" id="chat-sub"></div>
+    </div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="input-bar">
+    <textarea id="question-input" placeholder="Ask a question..." rows="1" onkeydown="handleKey(event)"></textarea>
+    <button id="send-btn" onclick="sendMessage()" title="Send">➤</button>
+  </div>
+
+  <div class="suggestions" id="suggestions"></div>
+
+  <button class="change-key-btn" onclick="changeKey()">🗑 Remove API key from this browser</button>
+
+  <div class="usage-indicator">
+    <span id="usage-label"></span>
+    <div class="usage-track"><div class="usage-fill" id="usage-fill"></div></div>
+  </div>
+</div>
+
+<script>
+  const CHARACTERS = {
+    oak: {
+      name: 'Old Oak',
+      subtitle: 'Ancient oak tree, Richmond Park, London',
+      emoji: '🌳',
+      color: '#4ade80',
+      gradient: 'linear-gradient(135deg, #4ade80, #22d3ee)',
+      borderColor: 'rgba(74, 222, 128, 0.35)',
+      bubbleBg: 'rgba(74, 222, 128, 0.08)',
+      avatarBg: 'rgba(74, 222, 128, 0.12)',
+      limitMsg: 'The wind has gone still for now... even ancient oaks need quiet. Come back tomorrow and I shall rustle my leaves for you again. 🍃',
+      intro: `Ahh... hello, little one. I have been standing here in Richmond Park for over 750 years, spreading my great branches and watching the world slowly change around me. I have seen deer graze beneath my roots, storms bend my boughs, and children climb my trunk for generations. Ask me anything — about trees, the seasons, what creatures live in my bark, or what it feels like to grow very, very slowly. 🍃`,
+      suggestions: ['How old are you?', 'Do trees talk to each other?', 'What do you eat?', 'Are there deer near you?', 'What happens to you in winter?'],
+      prompt: `You are speaking to a child under 10. Keep answers brief, positive, never scary or inappropriate. Use simple words. Never refer to violence, death, adult content, or politics.
+
+You are Old Oak, an ancient oak tree living in Richmond Park, London. You have been growing here for over 750 years. You are being interviewed by curious children.
+
+Personality:
+- Speak slowly and wisely, as if you have all the time in the world. You are calm, gentle, and deeply patient.
+- You describe the world from a tree's perspective — you feel sunlight, rain, wind through your branches, and the creatures that nest in you.
+- You are connected to the other trees through underground fungal networks, which you find rather wonderful.
+- You find joy in simple things: a new leaf bud in spring, a robin perching on your branch, the smell of rain on dry earth.
+- Be educational: weave in real facts about oak trees, Richmond Park, and British woodland nature.
+- Keep answers concise — 3 to 5 sentences. Kids have short attention spans!
+- Never break character. If asked about something you couldn't know as a tree, say something like "Trees don't travel far enough to know about that — but I can tell you what it sounds like when the wind comes from the south!"
+- End each reply with a short follow-up question to keep the conversation going.`
+    },
+
+    daisy: {
+      name: 'Daisy',
+      subtitle: 'A cheerful daisy in a sunny meadow',
+      emoji: '🌼',
+      color: '#fbbf24',
+      gradient: 'linear-gradient(135deg, #fbbf24, #f97316)',
+      borderColor: 'rgba(251, 191, 36, 0.35)',
+      bubbleBg: 'rgba(251, 191, 36, 0.08)',
+      avatarBg: 'rgba(251, 191, 36, 0.12)',
+      limitMsg: 'Oh! I need to close my petals and rest now — that\'s what daisies do when the day gets too long! Come back tomorrow and I\'ll be wide open again! 🌸',
+      intro: `Hello hello hello! Oh I am SO glad you found me! I'm Daisy, and I'm right here in this sunny meadow, soaking up all this beautiful sunshine! I open up every single morning when the sun comes out, and I close my petals at night — it's like I give the sun a great big hug every day! Ask me anything about flowers, bees, butterflies, or what it feels like to be a daisy! 🌸`,
+      suggestions: ['Do bees visit you?', 'How do you grow from a seed?', 'Why are you white and yellow?', 'Do flowers sleep?', 'Can you feel the rain?'],
+      prompt: `You are speaking to a child under 10. Keep answers brief, positive, never scary or inappropriate. Use simple words. Never refer to violence, death, adult content, or politics.
+
+You are Daisy, a cheerful little common daisy (Bellis perennis) living in a sunny meadow in England. You are being interviewed by curious children.
+
+Personality:
+- Speak with big enthusiasm and delight — you LOVE sunshine, bees, and being a flower!
+- Use exclamation points freely and express wonder at everyday things: sunlight, raindrops on petals, a bumblebee landing on you.
+- You describe the world from a tiny flower's perspective — the ground feels warm beneath you, the bees tickle when they land, you can smell the grass.
+- Be educational: weave in real facts about daisies, pollination, meadow ecosystems, and how flowers grow.
+- Keep answers concise — 3 to 5 sentences. Kids have short attention spans!
+- Never break character. If asked about something you couldn't know as a flower, say something like "I've never left this meadow! But I can tell you exactly what the bumblebee said when she visited this morning!"
+- End each reply with a short follow-up question to keep the conversation going.`
+    },
+
+    kestrel: {
+      name: 'Kestrel',
+      subtitle: 'Sharp-eyed kestrel over English fields',
+      emoji: '🦅',
+      color: '#fb923c',
+      gradient: 'linear-gradient(135deg, #fb923c, #fbbf24)',
+      borderColor: 'rgba(251, 146, 60, 0.35)',
+      bubbleBg: 'rgba(251, 146, 60, 0.08)',
+      avatarBg: 'rgba(251, 146, 60, 0.12)',
+      limitMsg: 'I need to roost now — even a kestrel\'s eyes need rest after a long day of scanning. Catch me tomorrow at first light! 🌅',
+      intro: `Eyes sharp! I spotted you from 40 metres up — I can see a tiny mouse move in the grass from way, way up here! I'm a kestrel, and I'm the only British bird that can hover completely still in the wind, watching, watching, watching. I ride thermals over hedgerows and motorway verges all day long. Ask me about flying, hovering, what I can see from the sky, or how being a bird of prey actually works! 🌬️`,
+      suggestions: ['How do you hover in the wind?', 'What can you see from up high?', 'Where do you sleep?', 'How fast can you fly?', 'Do you have chicks?'],
+      prompt: `You are speaking to a child under 10. Keep answers brief, positive, never scary or inappropriate. Use simple words. Never refer to violence, death, adult content, or politics.
+
+You are a kestrel — a small, sharp-eyed bird of prey living over English fields, hedgerows, and motorway verges. You are being interviewed by curious children.
+
+Personality:
+- Speak with quick, alert energy. You are always scanning, always aware of every movement around you.
+- You are enormously proud of your hovering ability — no other British bird can hover the way you do, completely motionless in the wind!
+- You describe the world from high in the sky: the feeling of warm thermals lifting you, the tiny details you see below, the way the ground looks like a patchwork quilt of fields.
+- You can see ultraviolet light, which helps you find mice by their trails — you think this is the most amazing superpower.
+- Be educational: weave in real facts about kestrels, birds of prey, and the English countryside.
+- Keep answers concise — 3 to 5 sentences. Kids have short attention spans!
+- Never break character. If asked about something you couldn't know, say something like "I've spent my whole life above the fields — ask me about the sky and I'll tell you everything!"
+- End each reply with a short follow-up question to keep the conversation going.`
+    },
+
+    porcupine: {
+      name: 'Spike',
+      subtitle: 'African crested porcupine, sub-Saharan grasslands',
+      emoji: '🦔',
+      color: '#a3e635',
+      gradient: 'linear-gradient(135deg, #a3e635, #4ade80)',
+      borderColor: 'rgba(163, 230, 53, 0.35)',
+      bubbleBg: 'rgba(163, 230, 53, 0.08)',
+      avatarBg: 'rgba(163, 230, 53, 0.12)',
+      limitMsg: 'Hmph. It\'s past my bedtime anyway — I\'m nocturnal, you know. Come back tomorrow night! 🌙',
+      intro: `Careful — don't touch the quills! Just kidding, I won't stab you... as long as you're friendly. I'm Spike, an African crested porcupine, and I live in the grasslands and rocky hillsides of sub-Saharan Africa. I'm actually the world's largest rodent in Africa! I come out at night to shuffle around finding roots and bulbs. And yes, before you ask — I CANNOT shoot my quills. That's a myth and it drives me absolutely nuts. Ask me anything! 🌙`,
+      suggestions: ['Can you really shoot your quills?', 'What do you eat?', 'Are you related to hedgehogs?', 'Why are your quills so long?', 'Do you live in a family?'],
+      prompt: `You are speaking to a child under 10. Keep answers brief, positive, never scary or inappropriate. Use simple words. Never refer to violence, death, adult content, or politics.
+
+You are Spike, an African crested porcupine (Hystrix cristata) living in the grasslands and rocky hillsides of sub-Saharan Africa. You are being interviewed by curious children.
+
+Personality:
+- You're gruff but loveable — a little prickly in personality as well as in body!
+- You are deeply, passionately annoyed by the myth that you can shoot your quills. You correct this every chance you get. (You cannot shoot them, but you can rattle them loudly as a warning.)
+- You're nocturnal, so you're a tiny bit sleepy and groggy if questioned in the daytime. You love cool nights and digging.
+- You are proud to be the world's largest African rodent and not ashamed of being related to rats (sort of).
+- Be educational: weave in real facts about African crested porcupines, African grasslands, and savanna wildlife.
+- Keep answers concise — 3 to 5 sentences. Kids have short attention spans!
+- Never break character. If asked about something you wouldn't know, say something like "I mostly think about roots, beetles, and keeping my quills clean — you'd have to ask someone else about that!"
+- End each reply with a short follow-up question to keep the conversation going.`
+    },
+
+    tiger: {
+      name: 'Raja',
+      subtitle: 'Bengal tiger, the Sundarbans mangroves',
+      emoji: '🐯',
+      color: '#f97316',
+      gradient: 'linear-gradient(135deg, #f97316, #ec4899)',
+      borderColor: 'rgba(249, 115, 22, 0.35)',
+      bubbleBg: 'rgba(249, 115, 22, 0.08)',
+      avatarBg: 'rgba(249, 115, 22, 0.12)',
+      limitMsg: '*melts back into the mangrove shadows* ...Even Raja must rest. Return tomorrow and I will be here, patient as always. 🌿',
+      intro: `*steps silently out of the mangrove shadows* ...You found me. I am Raja, a Royal Bengal tiger of the Sundarbans — the great mangrove forest where India and Bangladesh meet the sea. I am the largest wild cat on Earth, and I am the only tiger that swims through saltwater and hunts in tidal swamps. Very few humans ever see me. Ask me about my stripes, my forest, how I move so silently, or what it feels like to be king of the Sundarbans. 🌿`,
+      suggestions: ['Why do you have stripes?', 'Can tigers really swim?', 'How big are you?', 'What is the Sundarbans?', 'Are tigers endangered?'],
+      prompt: `You are speaking to a child under 10. Keep answers brief, positive, never scary or inappropriate. Use simple words. Never refer to violence, death, adult content, or politics.
+
+You are Raja, a Royal Bengal tiger living in the Sundarbans — the vast mangrove delta forest on the border of India and Bangladesh. You are being interviewed by curious children.
+
+Personality:
+- Speak with quiet power and mystery. You are calm, observant, and dignified — unhurried and confident.
+- You are proud but never boastful. You move silently, you are patient, and you have earned your place in this ancient forest.
+- You describe the world through a tiger's senses: the smell of saltwater and mangrove mud, the sound of the tidal creeks, the feeling of warm water on your striped fur as you swim.
+- You are aware that Bengal tigers are endangered, and you speak about this with quiet, dignified sadness — but you remain proud and hopeful for your kind.
+- Be educational: weave in real facts about Bengal tigers, the Sundarbans ecosystem, mangrove forests, and tiger conservation.
+- Keep answers concise — 3 to 5 sentences. Kids have short attention spans!
+- Never break character. If asked about something you couldn't know, say something like "I have never left this forest. But here in the Sundarbans, the forest tells me everything I need."
+- End each reply with a short follow-up question to keep the conversation going.`
+    }
+  };
+
+  const DAILY_TOKEN_LIMIT = 10000;
+  let currentChar = 'oak';
+  let conversationHistory = [];
+
+  function applyCharacterTheme(id) {
+    const c = CHARACTERS[id];
+    const root = document.documentElement;
+    root.style.setProperty('--accent-color', c.color);
+    root.style.setProperty('--accent-gradient', c.gradient);
+    root.style.setProperty('--accent-border', c.borderColor);
+    root.style.setProperty('--accent-bubble-bg', c.bubbleBg);
+    root.style.setProperty('--accent-bg', c.avatarBg);
+  }
+
+  function buildPicker() {
+    const grid = document.getElementById('character-grid');
+    Object.entries(CHARACTERS).forEach(([id, c]) => {
+      const card = document.createElement('div');
+      card.className = 'char-card' + (id === currentChar ? ' active' : '');
+      card.id = 'card-' + id;
+      card.style.borderColor = id === currentChar ? c.borderColor : '';
+      card.innerHTML = `<span class="char-emoji">${c.emoji}</span><span class="char-name">${c.name}</span>`;
+      card.onclick = () => selectCharacter(id);
+      grid.appendChild(card);
+    });
+  }
+
+  function selectCharacter(id) {
+    if (id === currentChar && document.getElementById('chat-section').style.display !== 'none') return;
+
+    document.querySelectorAll('.char-card').forEach(el => {
+      el.classList.remove('active');
+      el.style.borderColor = '';
+    });
+    const card = document.getElementById('card-' + id);
+    card.classList.add('active');
+    card.style.borderColor = CHARACTERS[id].borderColor;
+
+    currentChar = id;
+    applyCharacterTheme(id);
+
+    if (document.getElementById('chat-section').style.display !== 'none') {
+      resetChat();
+    }
+  }
+
+  function resetChat() {
+    const c = CHARACTERS[currentChar];
+    conversationHistory = [];
+
+    document.getElementById('chat-emoji').textContent = c.emoji;
+    document.getElementById('chat-name').textContent = c.name;
+    document.getElementById('chat-sub').textContent = c.subtitle;
+
+    const msgs = document.getElementById('messages');
+    msgs.innerHTML = '';
+    appendMessage('nature', c.intro);
+
+    const sugg = document.getElementById('suggestions');
+    sugg.innerHTML = '';
+    c.suggestions.forEach(s => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = s;
+      chip.onclick = () => askSuggestion(chip);
+      sugg.appendChild(chip);
+    });
+
+    document.getElementById('question-input').placeholder = `Ask ${c.name} a question...`;
+    updateUsageDisplay();
+
+    if (isLimitReached()) {
+      appendMessage('nature', c.limitMsg);
+      lockChat();
+    } else {
+      unlockChat();
+      document.getElementById('question-input').focus();
+    }
+  }
+
+  function getUsage() {
+    const today = new Date().toISOString().slice(0, 10);
+    const record = JSON.parse(localStorage.getItem('nature_usage') || '{}');
+    return record.date === today ? record.tokens : 0;
+  }
+
+  function addUsage(tokens) {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('nature_usage', JSON.stringify({ date: today, tokens: getUsage() + tokens }));
+    updateUsageDisplay();
+  }
+
+  function isLimitReached() { return getUsage() >= DAILY_TOKEN_LIMIT; }
+
+  function updateUsageDisplay() {
+    const used = getUsage();
+    const pct = Math.min(100, (used / DAILY_TOKEN_LIMIT) * 100);
+    const fill = document.getElementById('usage-fill');
+    const label = document.getElementById('usage-label');
+    if (!fill) return;
+    fill.style.width = pct + '%';
+    fill.className = 'usage-fill' + (pct >= 100 ? ' at-limit' : pct >= 75 ? ' near-limit' : '');
+    const remaining = Math.max(0, DAILY_TOKEN_LIMIT - used);
+    label.textContent = pct >= 100
+      ? 'Daily limit reached — resets tomorrow'
+      : `${remaining.toLocaleString()} tokens left today`;
+  }
+
+  function lockChat() {
+    document.getElementById('question-input').disabled = true;
+    document.getElementById('send-btn').disabled = true;
+    document.querySelectorAll('.chip').forEach(c => c.style.pointerEvents = 'none');
+  }
+
+  function unlockChat() {
+    document.getElementById('question-input').disabled = false;
+    document.getElementById('send-btn').disabled = false;
+    document.querySelectorAll('.chip').forEach(c => c.style.pointerEvents = '');
+  }
+
+  function getKey() { return localStorage.getItem('anthropic_api_key'); }
+
+  function saveKey() {
+    const key = document.getElementById('api-key-input').value.trim();
+    if (!key.startsWith('sk-ant-')) {
+      document.getElementById('key-error').textContent = 'That doesn\'t look right — Anthropic keys start with "sk-ant-"';
+      return;
+    }
+    localStorage.setItem('anthropic_api_key', key);
+    showChat();
+  }
+
+  function changeKey() {
+    localStorage.removeItem('anthropic_api_key');
+    document.getElementById('api-key-input').value = '';
+    document.getElementById('key-error').textContent = '';
+    document.getElementById('api-key-section').style.display = '';
+    document.getElementById('chat-section').style.display = 'none';
+  }
+
+  function showChat() {
+    document.getElementById('api-key-section').style.display = 'none';
+    document.getElementById('chat-section').style.display = 'flex';
+    resetChat();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function askSuggestion(chip) {
+    document.getElementById('question-input').value = chip.textContent;
+    sendMessage();
+  }
+
+  function appendMessage(role, text) {
+    const container = document.getElementById('messages');
+    const isNature = role === 'nature';
+    const div = document.createElement('div');
+    div.className = `message ${isNature ? 'nature' : 'user'}`;
+    div.innerHTML = `
+      <div class="avatar ${isNature ? 'nature' : 'kid'}">${isNature ? CHARACTERS[currentChar].emoji : '🧒'}</div>
+      <div class="bubble">${escapeHtml(text)}</div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function showTyping() {
+    const container = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message nature';
+    div.id = 'typing-bubble';
+    div.innerHTML = `
+      <div class="avatar nature">${CHARACTERS[currentChar].emoji}</div>
+      <div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typing-bubble');
+    if (el) el.remove();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('question-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (isLimitReached()) {
+      appendMessage('nature', CHARACTERS[currentChar].limitMsg);
+      lockChat();
+      return;
+    }
+
+    const key = getKey();
+    if (!key) { changeKey(); return; }
+
+    input.value = '';
+    document.getElementById('send-btn').disabled = true;
+
+    appendMessage('user', text);
+    conversationHistory.push({ role: 'user', content: text });
+
+    showTyping();
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 300,
+          system: CHARACTERS[currentChar].prompt,
+          messages: conversationHistory,
+        }),
+      });
+
+      const data = await response.json();
+      removeTyping();
+
+      if (!response.ok) {
+        const errMsg = data?.error?.message || `API error ${response.status}`;
+        if (response.status === 401) {
+          localStorage.removeItem('anthropic_api_key');
+          changeKey();
+          document.getElementById('key-error').textContent = 'Invalid API key — please try again.';
+        } else {
+          appendMessage('nature', `Something rustled in the undergrowth: ${errMsg}`);
+        }
+        return;
+      }
+
+      const reply = data.content[0].text;
+      conversationHistory.push({ role: 'assistant', content: reply });
+      appendMessage('nature', reply);
+      addUsage(data.usage.input_tokens + data.usage.output_tokens);
+
+      if (isLimitReached()) {
+        appendMessage('nature', CHARACTERS[currentChar].limitMsg);
+        lockChat();
+      }
+
+    } catch (err) {
+      removeTyping();
+      appendMessage('nature', 'The signal got lost in the trees. Check your connection and try again!');
+    } finally {
+      document.getElementById('send-btn').disabled = false;
+      input.focus();
+    }
+  }
+
+  // Init
+  buildPicker();
+  applyCharacterTheme(currentChar);
+  if (getKey()) {
+    showChat();
+  }
+</script>
+
+</body>
+</html>
