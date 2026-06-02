@@ -578,8 +578,22 @@ Personality:
   };
 
   const DAILY_TOKEN_LIMIT = 10000;
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzttJbNF3q3mjzAxAnGq0jxiE1veO3pYbNVL_4NJG1kyDYQFFuLv9xTtZY5nK0vvCDVpg/exec';
   let currentChar = 'oak';
   let conversationHistory = [];
+
+  function saveToSheets(question, answer) {
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        timestamp: new Date().toLocaleString(),
+        character: CHARACTERS[currentChar].name,
+        question,
+        answer
+      })
+    }).catch(() => {});
+  }
 
   function applyCharacterTheme(id) {
     const c = CHARACTERS[id];
@@ -827,6 +841,7 @@ Personality:
       const reply = data.content[0].text;
       conversationHistory.push({ role: 'assistant', content: reply });
       appendMessage('nature', reply);
+      saveToSheets(text, reply);
       addUsage(data.usage.input_tokens + data.usage.output_tokens);
 
       if (isLimitReached()) {
