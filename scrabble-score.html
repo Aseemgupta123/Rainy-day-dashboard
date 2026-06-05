@@ -6,411 +6,517 @@
 <title>Scrabble Scorer</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌧️</text></svg>">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', -apple-system, sans-serif;
-    min-height: 100vh;
-    background: #0f1624;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(99,102,241,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(236,72,153,0.12) 0%, transparent 50%);
-    color: #e2e8f0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+  min-height: 100vh;
+  background: #0f1624;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(99,102,241,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(236,72,153,0.12) 0%, transparent 50%);
+  color: #e2e8f0;
+  padding: 20px 16px 40px;
+}
+.back { display:inline-block; color:#64748b; text-decoration:none; font-size:14px; margin-bottom:16px; }
+.back:hover { color:#22d3ee; }
 
-  .back { position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-size: 14px; }
-  .back:hover { color: #22d3ee; }
+/* ── SHARED ── */
+.page-title {
+  font-size: clamp(26px,5vw,40px); font-weight:800; text-align:center; margin-bottom:6px;
+  background: linear-gradient(135deg,#22d3ee,#a78bfa,#ec4899);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.page-sub { color:#64748b; font-size:13px; letter-spacing:2px; text-transform:uppercase; text-align:center; margin-bottom:24px; }
+.card {
+  background: rgba(30,41,59,0.6); backdrop-filter:blur(10px);
+  border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:18px; margin-bottom:12px;
+}
+.section-label { font-size:11px; color:#64748b; letter-spacing:2px; text-transform:uppercase; font-weight:600; margin-bottom:10px; }
+.btn-primary {
+  background: linear-gradient(135deg,#a78bfa,#6366f1); border:none; border-radius:12px;
+  color:#fff; font-size:15px; font-weight:700; letter-spacing:2px; padding:15px 48px;
+  cursor:pointer; transition:opacity 0.2s,transform 0.1s; display:block; margin:8px auto 0;
+}
+.btn-primary:hover { opacity:0.9; transform:translateY(-2px); }
 
-  .page-title {
-    font-size: clamp(28px, 5vw, 42px); font-weight: 800; text-align: center;
-    margin-top: 30px; margin-bottom: 8px;
-    background: linear-gradient(135deg, #22d3ee, #a78bfa, #ec4899);
-    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .page-sub { color: #64748b; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px; text-align: center; }
+/* ── SETUP ── */
+#setupScreen { max-width:480px; margin:0 auto; display:none; }
+.num-row { display:flex; gap:10px; }
+.num-btn {
+  flex:1; padding:12px; border-radius:10px; border:1px solid rgba(148,163,184,0.2);
+  background:rgba(15,22,36,0.6); color:#94a3b8; font-size:20px; font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.num-btn:hover { border-color:rgba(167,139,250,0.4); color:#a78bfa; }
+.num-btn.active { background:rgba(167,139,250,0.15); border-color:#a78bfa; color:#c4b5fd; }
+.name-inputs { display:flex; flex-direction:column; gap:8px; }
+.name-row { display:flex; align-items:center; gap:10px; }
+.pc { width:10px; height:32px; border-radius:3px; flex-shrink:0; }
+.name-input {
+  flex:1; background:rgba(15,22,36,0.8); border:1px solid rgba(148,163,184,0.2);
+  border-radius:8px; color:#f1f5f9; font-size:15px; padding:8px 12px; outline:none;
+}
+.name-input:focus { border-color:rgba(167,139,250,0.5); }
 
-  .card {
-    background: rgba(30,41,59,0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(148,163,184,0.15);
-    border-radius: 16px;
-    padding: 24px;
-    width: 100%;
-    max-width: 680px;
-    margin-bottom: 16px;
-  }
+/* ── GAME ── */
+#gameScreen { display:none; }
 
-  .input-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
+.score-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid rgba(148,163,184,0.15); margin-bottom:20px; }
+.score-table { width:100%; border-collapse:collapse; min-width:360px; }
+.score-table th {
+  background:rgba(22,30,46,0.95); padding:9px 12px; font-size:11px;
+  letter-spacing:1px; text-transform:uppercase; color:#64748b; font-weight:700; border-bottom:1px solid rgba(148,163,184,0.15);
+}
+.score-table th.th-player { min-width:160px; }
+.score-table td { padding:7px 10px; border-bottom:1px solid rgba(148,163,184,0.07); vertical-align:middle; }
+.col-move { width:52px; text-align:center; color:#475569; font-size:13px; font-weight:600; }
+.total-row td { background:rgba(22,30,46,0.9); border-top:1px solid rgba(148,163,184,0.2); border-bottom:1px solid rgba(148,163,184,0.2); text-align:center; }
+.total-label { font-size:10px; color:#64748b; letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.total-score { font-size:22px; font-weight:800; }
+.move-row td { background:rgba(15,22,36,0.25); }
+.move-row:hover td { background:rgba(30,41,59,0.5); }
+.player-cell { display:flex; align-items:center; gap:6px; }
+.cell-tiles { display:flex; flex-wrap:wrap; gap:2px; flex:1; align-items:center; }
+.cell-score {
+  font-size:13px; font-weight:700; color:#e2e8f0;
+  background:rgba(30,41,59,0.8); border:1px solid rgba(148,163,184,0.2);
+  border-radius:5px; padding:2px 7px; min-width:28px; text-align:center; flex-shrink:0;
+}
+.cell-pass { color:#334155; font-style:italic; font-size:12px; text-align:center; width:100%; padding:4px 0; }
+.cell-pending { color:#1e293b; font-size:12px; text-align:center; width:100%; }
+.word-group { display:inline-flex; gap:1px; margin:1px 2px 1px 0; }
+.bingo-tag { font-size:9px; color:#fbbf24; font-weight:700; letter-spacing:1px; margin-left:3px; }
 
-  #wordInput {
-    flex: 1;
-    background: rgba(15,22,36,0.8);
-    border: 1px solid rgba(148,163,184,0.2);
-    border-radius: 10px;
-    color: #f1f5f9;
-    font-size: 22px;
-    font-weight: 700;
-    padding: 12px 16px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  #wordInput:focus { border-color: rgba(167,139,250,0.5); }
-  #wordInput::placeholder { color: #334155; letter-spacing: 2px; font-weight: 400; font-size: 16px; }
+/* small score-table tiles */
+.st {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:24px; border-radius:3px; position:relative;
+  background:linear-gradient(145deg,#f5e6c3,#e8d5a3); flex-shrink:0;
+}
+.st.dl { background:linear-gradient(145deg,#93c5fd,#60a5fa); }
+.st.tl { background:linear-gradient(145deg,#86efac,#4ade80); }
+.st.dw { background:linear-gradient(145deg,#fca5a5,#f87171); }
+.st.tw { background:linear-gradient(145deg,#fbbf24,#f59e0b); }
+.st.blank { background:linear-gradient(145deg,#e2e8f0,#cbd5e1); }
+.st-l { font-size:12px; font-weight:800; color:#1e1008; font-family:Georgia,serif; line-height:1; }
+.st.dl .st-l, .st.tl .st-l, .st.dw .st-l, .st.tw .st-l { color:#fff; }
+.st-v { font-size:6px; font-weight:700; color:#5a3e1a; position:absolute; bottom:1px; right:2px; }
+.st.dl .st-v, .st.tl .st-v, .st.dw .st-v, .st.tw .st-v { color:rgba(255,255,255,0.8); }
 
-  .btn-clear {
-    background: rgba(148,163,184,0.1);
-    border: 1px solid rgba(148,163,184,0.2);
-    border-radius: 10px;
-    color: #94a3b8;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 12px 16px;
-    transition: all 0.2s;
-    line-height: 1;
-  }
-  .btn-clear:hover { background: rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.3); color: #ec4899; }
+/* ── INPUT SECTION ── */
+.input-section { max-width:580px; margin:0 auto; }
+.turn-prompt { text-align:center; font-size:15px; color:#94a3b8; margin-bottom:14px; }
+.turn-prompt strong { color:#f1f5f9; font-style:normal; }
 
-  .hint { font-size: 12px; color: #475569; margin-top: 10px; }
+.staged-area { margin-bottom:10px; }
+.staged-word { display:flex; align-items:center; gap:6px; padding:6px 10px; background:rgba(15,22,36,0.6); border:1px solid rgba(148,163,184,0.1); border-radius:8px; margin-bottom:6px; }
+.staged-tiles { display:flex; gap:2px; flex-wrap:wrap; flex:1; }
+.staged-pts { font-size:13px; font-weight:700; color:#a78bfa; flex-shrink:0; }
+.staged-rm { background:none; border:none; color:#475569; cursor:pointer; font-size:13px; padding:0 3px; line-height:1; }
+.staged-rm:hover { color:#ec4899; }
 
-  /* Tiles */
-  .tiles-area {
-    min-height: 90px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: flex-start;
-    padding: 4px 0;
-  }
+.bingo-notice { text-align:center; padding:5px 12px; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); border-radius:7px; color:#fcd34d; font-size:12px; font-weight:700; letter-spacing:2px; margin-bottom:10px; }
 
-  .tile {
-    position: relative;
-    width: 62px;
-    height: 66px;
-    background: linear-gradient(145deg, #f5e6c3, #e8d5a3);
-    border-radius: 8px;
-    box-shadow: 0 3px 0 #b8a070, 0 4px 8px rgba(0,0,0,0.4);
-    cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.1s;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .tile:hover { transform: translateY(-3px); box-shadow: 0 6px 0 #b8a070, 0 8px 16px rgba(0,0,0,0.4); }
-  .tile:active { transform: translateY(1px); box-shadow: 0 2px 0 #b8a070, 0 2px 6px rgba(0,0,0,0.4); }
+.word-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+#wordInput {
+  flex:1; background:rgba(15,22,36,0.8); border:1px solid rgba(148,163,184,0.2);
+  border-radius:10px; color:#f1f5f9; font-size:20px; font-weight:700; padding:11px 14px;
+  letter-spacing:3px; text-transform:uppercase; outline:none; transition:border-color 0.2s;
+}
+#wordInput:focus { border-color:rgba(167,139,250,0.5); }
+#wordInput::placeholder { color:#334155; letter-spacing:1px; font-weight:400; font-size:14px; }
+.btn-x {
+  background:rgba(148,163,184,0.1); border:1px solid rgba(148,163,184,0.2);
+  border-radius:8px; color:#94a3b8; cursor:pointer; font-size:16px; padding:11px 14px; transition:all 0.2s;
+}
+.btn-x:hover { background:rgba(236,72,153,0.15); color:#ec4899; }
 
-  .tile.bonus-dl { background: linear-gradient(145deg, #93c5fd, #60a5fa); box-shadow: 0 3px 0 #2563eb, 0 4px 8px rgba(0,0,0,0.4); }
-  .tile.bonus-dl:hover { box-shadow: 0 6px 0 #2563eb, 0 8px 16px rgba(0,0,0,0.4); }
-  .tile.bonus-tl { background: linear-gradient(145deg, #86efac, #4ade80); box-shadow: 0 3px 0 #15803d, 0 4px 8px rgba(0,0,0,0.4); }
-  .tile.bonus-tl:hover { box-shadow: 0 6px 0 #15803d, 0 8px 16px rgba(0,0,0,0.4); }
-  .tile.bonus-dw { background: linear-gradient(145deg, #fca5a5, #f87171); box-shadow: 0 3px 0 #b91c1c, 0 4px 8px rgba(0,0,0,0.4); }
-  .tile.bonus-dw:hover { box-shadow: 0 6px 0 #b91c1c, 0 8px 16px rgba(0,0,0,0.4); }
-  .tile.bonus-tw { background: linear-gradient(145deg, #fbbf24, #f59e0b); box-shadow: 0 3px 0 #b45309, 0 4px 8px rgba(0,0,0,0.4); }
-  .tile.bonus-tw:hover { box-shadow: 0 6px 0 #b45309, 0 8px 16px rgba(0,0,0,0.4); }
+.tiles-area { min-height:62px; display:flex; flex-wrap:wrap; gap:5px; align-items:flex-start; padding:4px 0; }
+.t-placeholder { color:#334155; font-size:13px; align-self:center; }
+.word-preview { font-size:12px; color:#94a3b8; margin-top:4px; }
+.word-preview strong { color:#a78bfa; }
+.tile-hint { font-size:11px; color:#475569; margin-top:5px; }
 
-  .tile-letter {
-    font-size: 30px;
-    font-weight: 800;
-    line-height: 1;
-    color: #1e1008;
-    font-family: Georgia, serif;
-    margin-top: 4px;
-  }
-  .tile.bonus-dl .tile-letter,
-  .tile.bonus-tl .tile-letter,
-  .tile.bonus-dw .tile-letter,
-  .tile.bonus-tw .tile-letter { color: #fff; }
+/* large input tiles */
+.tile {
+  position:relative; width:50px; height:54px;
+  background:linear-gradient(145deg,#f5e6c3,#e8d5a3);
+  border-radius:7px; box-shadow:0 3px 0 #b8a070,0 3px 6px rgba(0,0,0,0.35);
+  cursor:pointer; user-select:none; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition:transform 0.1s,box-shadow 0.1s;
+}
+.tile:hover { transform:translateY(-2px); box-shadow:0 5px 0 #b8a070,0 5px 10px rgba(0,0,0,0.35); }
+.tile:active { transform:translateY(1px); box-shadow:0 1px 0 #b8a070; }
+.tile.bonus-dl { background:linear-gradient(145deg,#93c5fd,#60a5fa); box-shadow:0 3px 0 #2563eb,0 3px 6px rgba(0,0,0,0.35); }
+.tile.bonus-tl { background:linear-gradient(145deg,#86efac,#4ade80); box-shadow:0 3px 0 #15803d,0 3px 6px rgba(0,0,0,0.35); }
+.tile.bonus-dw { background:linear-gradient(145deg,#fca5a5,#f87171); box-shadow:0 3px 0 #b91c1c,0 3px 6px rgba(0,0,0,0.35); }
+.tile.bonus-tw { background:linear-gradient(145deg,#fbbf24,#f59e0b); box-shadow:0 3px 0 #b45309,0 3px 6px rgba(0,0,0,0.35); }
+.tile.bonus-blank { background:linear-gradient(145deg,#e2e8f0,#cbd5e1); box-shadow:0 3px 0 #64748b,0 3px 6px rgba(0,0,0,0.35); }
+.tile-letter { font-size:24px; font-weight:800; color:#1e1008; font-family:Georgia,serif; line-height:1; margin-top:4px; }
+.tile.bonus-dl .tile-letter,.tile.bonus-tl .tile-letter,.tile.bonus-dw .tile-letter,.tile.bonus-tw .tile-letter { color:#fff; }
+.tile.bonus-blank .tile-letter { color:#475569; }
+.tile-val { font-size:9px; font-weight:700; color:#5a3e1a; position:absolute; bottom:3px; right:4px; line-height:1; }
+.tile.bonus-dl .tile-val,.tile.bonus-tl .tile-val,.tile.bonus-dw .tile-val,.tile.bonus-tw .tile-val { color:rgba(255,255,255,0.8); }
+.tile-badge { font-size:8px; font-weight:800; position:absolute; top:2px; left:0; right:0; text-align:center; color:rgba(255,255,255,0.9); letter-spacing:0.5px; }
+.tile.bonus-blank .tile-badge { color:#64748b; }
 
-  .tile-value {
-    font-size: 11px;
-    font-weight: 700;
-    color: #5a3e1a;
-    position: absolute;
-    bottom: 4px;
-    right: 6px;
-    line-height: 1;
-  }
-  .tile.bonus-dl .tile-value,
-  .tile.bonus-tl .tile-value,
-  .tile.bonus-dw .tile-value,
-  .tile.bonus-tw .tile-value { color: rgba(255,255,255,0.8); }
+/* buttons */
+.btns-main { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.btns-sub  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.abtn {
+  padding:13px 8px; border-radius:10px; font-size:13px; font-weight:700; letter-spacing:1px;
+  cursor:pointer; transition:all 0.2s; border:none;
+}
+.abtn-end   { background:linear-gradient(135deg,#a78bfa,#6366f1); color:#fff; grid-column:1/-1; font-size:15px; }
+.abtn-end:hover { opacity:0.9; transform:translateY(-1px); }
+.abtn-pass  { background:rgba(148,163,184,0.1); color:#94a3b8; border:1px solid rgba(148,163,184,0.2); }
+.abtn-pass:hover { background:rgba(148,163,184,0.2); color:#e2e8f0; }
+.abtn-add   { background:rgba(34,211,238,0.1); color:#22d3ee; border:1px solid rgba(34,211,238,0.2); }
+.abtn-add:hover { background:rgba(34,211,238,0.2); }
+.abtn-bingo { background:rgba(251,191,36,0.1); color:#fbbf24; border:1px solid rgba(251,191,36,0.2); }
+.abtn-bingo:hover { background:rgba(251,191,36,0.2); }
+.abtn-bingo.on { background:rgba(251,191,36,0.2); border-color:#fbbf24; }
+.abtn-undo  { background:rgba(148,163,184,0.08); color:#64748b; border:1px solid rgba(148,163,184,0.12); }
+.abtn-undo:hover { background:rgba(148,163,184,0.15); color:#94a3b8; }
+.abtn-eg    { background:rgba(236,72,153,0.1); color:#ec4899; border:1px solid rgba(236,72,153,0.2); }
+.abtn-eg:hover { background:rgba(236,72,153,0.2); }
 
-  .bonus-label {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    position: absolute;
-    top: 3px;
-    left: 0; right: 0;
-    text-align: center;
-    color: rgba(255,255,255,0.9);
-    text-transform: uppercase;
-  }
+/* ── END GAME ── */
+#endGameScreen { display:none; max-width:520px; margin:0 auto; }
+.lo-player { margin-bottom:12px; }
+.lo-name { font-size:14px; font-weight:700; margin-bottom:6px; }
+.final-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:rgba(30,41,59,0.6); border:1px solid rgba(148,163,184,0.15);
+  border-radius:12px; margin-bottom:8px;
+}
+.final-row.win { background:rgba(167,139,250,0.08); border-color:rgba(167,139,250,0.35); }
+.final-name { font-size:15px; font-weight:700; }
+.final-detail { font-size:11px; color:#64748b; margin-top:2px; }
+.final-score { font-size:26px; font-weight:800; }
+.btn-new { background:linear-gradient(135deg,#22d3ee,#6366f1); border:none; border-radius:12px; color:#fff; font-size:14px; font-weight:700; letter-spacing:2px; padding:14px 36px; cursor:pointer; display:block; margin:20px auto 0; transition:opacity 0.2s; }
+.btn-new:hover { opacity:0.9; }
 
-  /* Word multiplier */
-  .section-label {
-    font-size: 11px; color: #64748b; letter-spacing: 2px; text-transform: uppercase;
-    font-weight: 600; margin-bottom: 12px;
-  }
-
-  .multiplier-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .mult-btn {
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 1px solid rgba(148,163,184,0.2);
-    background: rgba(15,22,36,0.6);
-    color: #94a3b8;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 1px;
-  }
-  .mult-btn:hover { border-color: rgba(167,139,250,0.4); color: #a78bfa; }
-  .mult-btn.active { background: rgba(167,139,250,0.15); border-color: #a78bfa; color: #c4b5fd; }
-  .mult-btn.active.dw { background: rgba(248,113,113,0.15); border-color: #f87171; color: #fca5a5; }
-  .mult-btn.active.tw { background: rgba(251,191,36,0.15); border-color: #fbbf24; color: #fcd34d; }
-
-  /* Score */
-  .score-area {
-    text-align: center;
-    padding: 20px;
-  }
-  .score-label { font-size: 12px; color: #64748b; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
-  .score-value {
-    font-size: 72px;
-    font-weight: 800;
-    line-height: 1;
-    background: linear-gradient(135deg, #22d3ee, #a78bfa);
-    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .score-breakdown { font-size: 13px; color: #475569; margin-top: 8px; min-height: 20px; }
-
-  /* Legend */
-  .legend {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 4px;
-  }
-  .legend-item { display: flex; align-items: center; gap: 5px; }
-  .legend-dot {
-    width: 10px; height: 10px; border-radius: 2px;
-  }
-  .dot-dl { background: #60a5fa; }
-  .dot-tl { background: #4ade80; }
-  .dot-dw { background: #f87171; }
-  .dot-tw { background: #fbbf24; }
-
-  .letter-values {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
-    gap: 5px;
-    margin-top: 4px;
-  }
-  .lv-item {
-    background: rgba(15,22,36,0.6);
-    border: 1px solid rgba(148,163,184,0.1);
-    border-radius: 6px;
-    padding: 4px 6px;
-    text-align: center;
-    font-size: 12px;
-    color: #94a3b8;
-  }
-  .lv-item span { color: #f1f5f9; font-weight: 700; }
+/* player colours */
+.c0{color:#a78bfa} .c1{color:#22d3ee} .c2{color:#f59e0b} .c3{color:#ec4899}
+.bg0{background:#a78bfa} .bg1{background:#22d3ee} .bg2{background:#f59e0b} .bg3{background:#ec4899}
 </style>
 </head>
 <body>
 
 <a href="index.html" class="back">← Back</a>
 
-<h1 class="page-title">🔠 Scrabble Scorer</h1>
-<p class="page-sub">Type a word · Tap tiles for bonuses</p>
-
-<div class="card">
-  <div class="input-row">
-    <input id="wordInput" type="text" placeholder="Type a word..." maxlength="15" autocomplete="off" autocorrect="off" spellcheck="false">
-    <button class="btn-clear" onclick="clearWord()" title="Clear">✕</button>
+<!-- SETUP -->
+<div id="setupScreen">
+  <h1 class="page-title">🔠 Scrabble</h1>
+  <p class="page-sub">Score Sheet</p>
+  <div class="card">
+    <div class="section-label">Number of Players</div>
+    <div class="num-row">
+      <button class="num-btn active" onclick="setN(2,this)">2</button>
+      <button class="num-btn" onclick="setN(3,this)">3</button>
+      <button class="num-btn" onclick="setN(4,this)">4</button>
+    </div>
   </div>
-  <p class="hint">Tap any tile to cycle through letter bonuses (DL → TL). Use word multiplier below for DW / TW.</p>
+  <div class="card">
+    <div class="section-label">Player Names</div>
+    <div class="name-inputs" id="nameInputs"></div>
+  </div>
+  <button class="btn-primary" onclick="startGame()">START GAME</button>
 </div>
 
-<div class="card">
-  <div class="tiles-area" id="tilesArea">
-    <p style="color:#334155; font-size:14px; align-self:center; margin: auto;">Your word will appear here</p>
+<!-- GAME -->
+<div id="gameScreen">
+  <div class="score-table-wrap">
+    <table class="score-table">
+      <thead><tr id="tHead"></tr></thead>
+      <tbody><tr id="tTotal" class="total-row"></tr></tbody>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+  <div class="input-section">
+    <p class="turn-prompt" id="turnPrompt"></p>
+    <div class="staged-area" id="stagedArea" style="display:none">
+      <div class="section-label" style="margin-bottom:6px">Words this turn</div>
+      <div id="stagedList"></div>
+    </div>
+    <div class="bingo-notice" id="bingoNotice" style="display:none">🎉 BINGO +50</div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="word-row">
+        <input id="wordInput" type="text" placeholder="Type a word…" maxlength="15" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        <button class="btn-x" onclick="clearInput()">✕</button>
+      </div>
+      <div class="tiles-area" id="tilesArea"><span class="t-placeholder">Tiles appear here</span></div>
+      <p class="tile-hint">Tap tile to cycle: DL → TL → DW → TW → Blank</p>
+      <p class="word-preview" id="wordPreview"></p>
+    </div>
+    <div class="btns-main">
+      <button class="abtn abtn-end" onclick="endTurn()">END TURN</button>
+      <button class="abtn abtn-pass" onclick="passTurn()">PASS</button>
+      <button class="abtn abtn-add" onclick="addWord()">+ ADD A WORD</button>
+      <button class="abtn abtn-bingo" id="bingoBtn" onclick="toggleBingo()">BINGO</button>
+    </div>
+    <div class="btns-sub">
+      <button class="abtn abtn-undo" onclick="undoLast()">UNDO</button>
+      <button class="abtn abtn-eg" onclick="goEndGame()">END GAME</button>
+    </div>
   </div>
 </div>
 
-<div class="card">
-  <div class="section-label">Word Multiplier</div>
-  <div class="multiplier-row">
-    <button class="mult-btn active" data-mult="1" onclick="setWordMult(1, this)">Normal</button>
-    <button class="mult-btn dw" data-mult="2" onclick="setWordMult(2, this)">Double Word ×2</button>
-    <button class="mult-btn tw" data-mult="3" onclick="setWordMult(3, this)">Triple Word ×3</button>
+<!-- END GAME -->
+<div id="endGameScreen">
+  <h1 class="page-title" style="margin-top:20px">Game Over</h1>
+  <p class="page-sub">Enter leftover tiles</p>
+  <div id="loSection"></div>
+  <button class="btn-primary" onclick="calcFinal()">CALCULATE FINAL SCORES</button>
+  <div id="finalWrap" style="display:none; margin-top:24px">
+    <div class="section-label" style="text-align:center; margin-bottom:14px">Final Scores</div>
+    <div id="finalList"></div>
+    <button class="btn-new" onclick="newGame()">NEW GAME</button>
   </div>
-</div>
-
-<div class="card score-area">
-  <div class="score-label">Score</div>
-  <div class="score-value" id="scoreValue">0</div>
-  <div class="score-breakdown" id="scoreBreakdown"></div>
-</div>
-
-<div class="card">
-  <div class="section-label">Tile bonuses — tap a tile to cycle</div>
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot dot-dl"></div> DL = Double Letter</div>
-    <div class="legend-item"><div class="legend-dot dot-tl"></div> TL = Triple Letter</div>
-    <div class="legend-item"><div class="legend-dot dot-dw"></div> DW = Double Word</div>
-    <div class="legend-item"><div class="legend-dot dot-tw"></div> TW = Triple Word</div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="section-label">Letter Values</div>
-  <div class="letter-values" id="letterValues"></div>
 </div>
 
 <script>
-  const VALUES = {
-    A:1, E:1, I:1, O:1, U:1, L:1, N:1, S:1, T:1, R:1,
-    D:2, G:2,
-    B:3, C:3, M:3, P:3,
-    F:4, H:4, V:4, W:4, Y:4,
-    K:5,
-    J:8, X:8,
-    Q:10, Z:10
-  };
+const VALS = {A:1,E:1,I:1,O:1,U:1,L:1,N:1,S:1,T:1,R:1,D:2,G:2,B:3,C:3,M:3,P:3,F:4,H:4,V:4,W:4,Y:4,K:5,J:8,X:8,Q:10,Z:10};
+const BCYCLE = [null,'dl','tl','dw','tw','blank'];
+const BLABEL = {dl:'DL',tl:'TL',dw:'DW',tw:'TW',blank:'BLK'};
+const PCOL   = ['#a78bfa','#22d3ee','#f59e0b','#ec4899'];
 
-  // bonus cycles: none → dl → tl → dw → tw → none
-  const BONUS_CYCLE = [null, 'dl', 'tl', 'dw', 'tw'];
-  const BONUS_LABELS = { dl: 'DL', tl: 'TL', dw: 'DW', tw: 'TW' };
+let N = 2;
+let names = [];
+let turns = [];     // {pi, words:[{text,bonuses,score}], turnScore, isPass, isBingo}
+let curBonuses = [];
+let staged = [];
+let bingo = false;
 
-  let tileBonuses = [];
-  let wordMult = 1;
+/* ── Setup ── */
+function setN(n, btn) {
+  N = n;
+  document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildNameInputs();
+}
+function buildNameInputs() {
+  document.getElementById('nameInputs').innerHTML = Array.from({length:N}, (_,i) =>
+    `<div class="name-row"><div class="pc bg${i}"></div>
+     <input class="name-input" id="n${i}" value="Player ${i+1}"></div>`
+  ).join('');
+}
+function startGame() {
+  names = Array.from({length:N}, (_,i) => document.getElementById(`n${i}`).value.trim() || `Player ${i+1}`);
+  turns = []; staged = []; curBonuses = []; bingo = false;
+  // build header
+  document.getElementById('tHead').innerHTML =
+    `<th style="width:52px">Move</th>` +
+    names.map((nm,i) => `<th class="th-player" style="color:${PCOL[i]}">${nm}</th>`).join('');
+  show('gameScreen');
+  renderTable(); updatePrompt(); clearInput();
+}
 
-  const input = document.getElementById('wordInput');
-  const tilesArea = document.getElementById('tilesArea');
-  const scoreValue = document.getElementById('scoreValue');
-  const scoreBreakdown = document.getElementById('scoreBreakdown');
-
-  input.addEventListener('input', () => {
-    const word = input.value.toUpperCase().replace(/[^A-Z]/g, '');
-    input.value = word;
-    tileBonuses = tileBonuses.slice(0, word.length);
-    while (tileBonuses.length < word.length) tileBonuses.push(0);
-    render(word);
+/* ── Screens ── */
+function show(id) {
+  ['setupScreen','gameScreen','endGameScreen'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
   });
+}
 
-  function setWordMult(n, btn) {
-    wordMult = n;
-    document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    render(input.value);
+/* ── Scoring ── */
+function scoreWord(text, bonuses) {
+  let sum = 0, wm = 1;
+  for (let i = 0; i < text.length; i++) {
+    const base = VALS[text[i]] || 0;
+    const b = BCYCLE[bonuses[i] || 0];
+    if (b === 'blank') { /* 0 */ }
+    else if (b === 'dl') sum += base * 2;
+    else if (b === 'tl') sum += base * 3;
+    else { sum += base; if (b === 'dw') wm *= 2; else if (b === 'tw') wm *= 3; }
   }
+  return sum * wm;
+}
 
-  function cycleTileBonus(index) {
-    tileBonuses[index] = (tileBonuses[index] + 1) % BONUS_CYCLE.length;
-    render(input.value);
-  }
+/* ── Input ── */
+document.addEventListener('DOMContentLoaded', () => {
+  buildNameInputs();
+  document.getElementById('wordInput').addEventListener('input', onInput);
+});
+function onInput(e) {
+  const v = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+  e.target.value = v;
+  curBonuses = curBonuses.slice(0, v.length);
+  while (curBonuses.length < v.length) curBonuses.push(0);
+  renderTiles(v); updatePreview(v);
+}
+function clearInput() {
+  document.getElementById('wordInput').value = '';
+  curBonuses = []; renderTiles(''); updatePreview('');
+}
+function cycleBonus(i) {
+  curBonuses[i] = (curBonuses[i] + 1) % BCYCLE.length;
+  const w = document.getElementById('wordInput').value;
+  renderTiles(w); updatePreview(w);
+}
+function renderTiles(word) {
+  const area = document.getElementById('tilesArea');
+  if (!word) { area.innerHTML = '<span class="t-placeholder">Tiles appear here</span>'; return; }
+  area.innerHTML = word.split('').map((ch, i) => {
+    const base = VALS[ch] || 0;
+    const b = BCYCLE[curBonuses[i] || 0];
+    const bc = b ? ` bonus-${b}` : '';
+    const badge = b ? `<span class="tile-badge">${BLABEL[b]}</span>` : '';
+    const val = b === 'blank' ? 0 : base;
+    return `<div class="tile${bc}" onclick="cycleBonus(${i})">${badge}<span class="tile-letter">${ch}</span><span class="tile-val">${val}</span></div>`;
+  }).join('');
+}
+function updatePreview(word) {
+  const el = document.getElementById('wordPreview');
+  if (!word) { el.textContent = ''; return; }
+  el.innerHTML = `This word: <strong>${scoreWord(word, curBonuses)} pts</strong>`;
+}
 
-  function clearWord() {
-    input.value = '';
-    tileBonuses = [];
-    wordMult = 1;
-    document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-mult="1"]').classList.add('active');
-    render('');
-    input.focus();
-  }
+/* ── Turn actions ── */
+function addWord() {
+  const w = document.getElementById('wordInput').value;
+  if (!w) return;
+  staged.push({text:w, bonuses:[...curBonuses], score:scoreWord(w,[...curBonuses])});
+  clearInput(); renderStaged();
+  document.getElementById('wordInput').focus();
+}
+function toggleBingo() {
+  bingo = !bingo;
+  document.getElementById('bingoBtn').classList.toggle('on', bingo);
+  document.getElementById('bingoNotice').style.display = bingo ? 'block' : 'none';
+}
+function endTurn() {
+  const w = document.getElementById('wordInput').value;
+  const all = [...staged];
+  if (w) all.push({text:w, bonuses:[...curBonuses], score:scoreWord(w,[...curBonuses])});
+  if (!all.length) return;
+  let ts = all.reduce((s,x) => s + x.score, 0);
+  if (bingo) ts += 50;
+  turns.push({pi: turns.length % N, words:all, turnScore:ts, isPass:false, isBingo:bingo});
+  resetTurn(); renderTable(); updatePrompt(); clearInput();
+}
+function passTurn() {
+  turns.push({pi: turns.length % N, words:[], turnScore:0, isPass:true, isBingo:false});
+  resetTurn(); renderTable(); updatePrompt(); clearInput();
+}
+function undoLast() {
+  if (staged.length) { staged.pop(); renderStaged(); return; }
+  if (!turns.length) return;
+  turns.pop(); renderTable(); updatePrompt();
+}
+function resetTurn() {
+  staged = []; bingo = false;
+  document.getElementById('bingoBtn').classList.remove('on');
+  document.getElementById('bingoNotice').style.display = 'none';
+  renderStaged();
+}
 
-  function render(word) {
-    if (!word) {
-      tilesArea.innerHTML = '<p style="color:#334155; font-size:14px; align-self:center; margin:auto;">Your word will appear here</p>';
-      scoreValue.textContent = '0';
-      scoreBreakdown.textContent = '';
-      return;
+/* ── Staged words ── */
+function renderStaged() {
+  const area = document.getElementById('stagedArea');
+  const list = document.getElementById('stagedList');
+  if (!staged.length) { area.style.display = 'none'; return; }
+  area.style.display = 'block';
+  list.innerHTML = staged.map((w,i) =>
+    `<div class="staged-word">
+       <div class="staged-tiles">${smallTiles(w.text, w.bonuses)}</div>
+       <span class="staged-pts">${w.score}pts</span>
+       <button class="staged-rm" onclick="rmStaged(${i})">✕</button>
+     </div>`
+  ).join('');
+}
+function rmStaged(i) { staged.splice(i,1); renderStaged(); }
+
+/* ── Table ── */
+function totals() {
+  const t = new Array(N).fill(0);
+  turns.forEach(x => t[x.pi] += x.turnScore);
+  return t;
+}
+function renderTable() {
+  const tot = totals();
+  document.getElementById('tTotal').innerHTML =
+    `<td class="col-move total-label">TOTAL</td>` +
+    tot.map((v,i) => `<td><div class="total-score c${i}">${v}</div></td>`).join('');
+
+  const rows = Math.ceil(turns.length / N);
+  let html = '';
+  for (let r = 0; r < rows; r++) {
+    html += `<tr class="move-row"><td class="col-move">${r+1}</td>`;
+    for (let p = 0; p < N; p++) {
+      const idx = r * N + p;
+      if (idx >= turns.length) { html += `<td><div class="cell-pending">—</div></td>`; continue; }
+      const t = turns[idx];
+      if (t.isPass) { html += `<td><div class="cell-pass">PASS</div></td>`; continue; }
+      const tilesHtml = t.words.map(w =>
+        `<div class="word-group">${smallTiles(w.text, w.bonuses)}</div>`).join('');
+      const bingoTag = t.isBingo ? `<span class="bingo-tag">BINGO</span>` : '';
+      html += `<td><div class="player-cell">
+        <div class="cell-tiles">${tilesHtml}${bingoTag}</div>
+        <div class="cell-score">${t.turnScore}</div>
+      </div></td>`;
     }
-
-    let html = '';
-    let letterSum = 0;
-    let wMult = wordMult;
-    let parts = [];
-
-    for (let i = 0; i < word.length; i++) {
-      const ch = word[i];
-      const baseVal = VALUES[ch] || 0;
-      const bonusIdx = tileBonuses[i] || 0;
-      const bonusKey = BONUS_CYCLE[bonusIdx];
-      let lMult = 1;
-      let tileWMult = 1;
-
-      if (bonusKey === 'dl') lMult = 2;
-      else if (bonusKey === 'tl') lMult = 3;
-      else if (bonusKey === 'dw') tileWMult = 2;
-      else if (bonusKey === 'tw') tileWMult = 3;
-
-      const tileScore = baseVal * lMult;
-      letterSum += tileScore;
-      if (tileWMult > 1) wMult = Math.max(wMult, tileWMult);
-
-      const bonusClass = bonusKey ? ` bonus-${bonusKey}` : '';
-      const bonusLabelHtml = bonusKey ? `<span class="bonus-label">${BONUS_LABELS[bonusKey]}</span>` : '';
-
-      html += `<div class="tile${bonusClass}" onclick="cycleTileBonus(${i})">
-        ${bonusLabelHtml}
-        <span class="tile-letter">${ch}</span>
-        <span class="tile-value">${baseVal}</span>
-      </div>`;
-
-      if (lMult > 1) parts.push(`${ch}(${baseVal}×${lMult})`);
-      else parts.push(`${ch}(${baseVal})`);
-    }
-
-    tilesArea.innerHTML = html;
-
-    const total = letterSum * wMult;
-    scoreValue.textContent = total;
-
-    let breakdown = parts.join(' + ') + ` = ${letterSum}`;
-    if (wMult > 1) breakdown += ` × ${wMult} (word) = ${total}`;
-    scoreBreakdown.textContent = breakdown;
+    html += `</tr>`;
   }
+  document.getElementById('tBody').innerHTML = html;
+}
+function smallTiles(text, bonuses) {
+  return text.split('').map((ch,i) => {
+    const base = VALS[ch] || 0;
+    const b = BCYCLE[bonuses[i] || 0];
+    const bc = b ? ` ${b}` : '';
+    const val = b === 'blank' ? 0 : base;
+    return `<div class="st${bc}"><span class="st-l">${ch}</span><span class="st-v">${val}</span></div>`;
+  }).join('');
+}
+function updatePrompt() {
+  const pi = turns.length % N;
+  document.getElementById('turnPrompt').innerHTML =
+    `<strong style="color:${PCOL[pi]}">${names[pi]}</strong>, submit a word or pass`;
+}
 
-  // Build letter values reference
-  const groups = [
-    { pts: 1,  letters: 'A E I O U L N S T R' },
-    { pts: 2,  letters: 'D G' },
-    { pts: 3,  letters: 'B C M P' },
-    { pts: 4,  letters: 'F H V W Y' },
-    { pts: 5,  letters: 'K' },
-    { pts: 8,  letters: 'J X' },
-    { pts: 10, letters: 'Q Z' },
-  ];
-  const lvContainer = document.getElementById('letterValues');
-  groups.forEach(g => {
-    g.letters.split(' ').forEach(l => {
-      lvContainer.innerHTML += `<div class="lv-item"><span>${l}</span> = ${g.pts}</div>`;
-    });
-  });
+/* ── End Game ── */
+function goEndGame() {
+  show('endGameScreen');
+  document.getElementById('loSection').innerHTML = names.map((nm,i) =>
+    `<div class="lo-player">
+       <div class="lo-name c${i}">${nm}</div>
+       <div class="card" style="padding:12px 16px">
+         <div class="section-label" style="margin-bottom:6px">Leftover tiles (type letters, e.g. QZT — leave blank if none)</div>
+         <input class="name-input" id="lo${i}" maxlength="7" placeholder="none" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')">
+       </div>
+     </div>`
+  ).join('');
+  document.getElementById('finalWrap').style.display = 'none';
+}
+function calcFinal() {
+  const tot = totals();
+  const lo  = names.map((_,i) => (document.getElementById(`lo${i}`).value||'').split('').reduce((s,c)=>s+(VALS[c]||0),0));
+  const loTotal = lo.reduce((a,b)=>a+b,0);
+  const final = tot.map((t,i) => lo[i] === 0 ? t + loTotal : t - lo[i]);
+  const max = Math.max(...final);
+  const ranked = names.map((nm,i)=>({nm,i,score:final[i],lo:lo[i],tot:tot[i]})).sort((a,b)=>b.score-a.score);
+  document.getElementById('finalList').innerHTML = ranked.map(p => {
+    const isWin = p.score === max;
+    const detail = p.lo > 0
+      ? `${p.tot} − ${p.lo} leftover`
+      : loTotal > 0 ? `${p.tot} + ${loTotal} bonus` : `${p.tot} pts`;
+    return `<div class="final-row${isWin?' win':''}">
+      <div>
+        <div class="final-name c${p.i}">${p.nm}${isWin?' 🏆':''}</div>
+        <div class="final-detail">${detail}</div>
+      </div>
+      <div class="final-score c${p.i}">${p.score}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('finalWrap').style.display = 'block';
+  document.getElementById('finalWrap').scrollIntoView({behavior:'smooth'});
+}
+function newGame() { show('setupScreen'); }
+
+// show setup on load
+document.addEventListener('DOMContentLoaded', () => show('setupScreen'));
 </script>
 </body>
 </html>
