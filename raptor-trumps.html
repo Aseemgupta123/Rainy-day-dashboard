@@ -187,9 +187,9 @@ button.statrow:hover .lab{color:var(--bone)}
 
 /* ---------- prompt / verdict ---------- */
 .prompt{
-  grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
   background:var(--slate);border:1px solid var(--line);border-left:3px solid var(--iris);
-  border-radius:3px;padding:12px 16px;margin-bottom:2px;
+  border-radius:3px;padding:12px 16px;margin-top:16px;
 }
 .prompt.teal{border-left-color:var(--teal)}
 .prompt.win{border-left-color:var(--moss)}
@@ -601,9 +601,11 @@ function render(){
 
   app.innerHTML = `<div class="table">
     ${railHTML(0)}
-    <div class="arena">${promptHTML()}${leftCard}${rightCard}</div>
+    <div class="arena">${leftCard}${rightCard}</div>
     ${railHTML(1)}
-  </div>${logHTML()}`;
+  </div>
+  ${promptHTML()}
+  ${logHTML()}`;
 
   app.querySelectorAll("button.statrow").forEach(b=>b.onclick=()=>choose(b.dataset.stat));
   const nb = document.getElementById("nextBtn");
