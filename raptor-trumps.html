@@ -93,6 +93,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .table{display:grid;grid-template-columns:170px 1fr 170px;gap:20px;align-items:start}
 @media(max-width:900px){.table{grid-template-columns:1fr;gap:14px}}
 
+.railcol{display:flex;flex-direction:column;gap:16px}
+
 .rail{background:var(--slate);border:1px solid var(--line);border-radius:3px;padding:14px}
 .rail.p2{border-color:var(--line)}
 .rail.active{border-color:var(--iris);box-shadow:inset 3px 0 0 var(--iris)}
@@ -189,7 +191,7 @@ button.statrow:hover .lab{color:var(--bone)}
 .prompt{
   display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
   background:var(--slate);border:1px solid var(--line);border-left:3px solid var(--iris);
-  border-radius:3px;padding:12px 16px;margin-top:16px;
+  border-radius:3px;padding:12px 16px;
 }
 .prompt.teal{border-left-color:var(--teal)}
 .prompt.win{border-left-color:var(--moss)}
@@ -517,7 +519,7 @@ function promptHTML(){
   return `<div class="prompt ${cls}">
     <div><div class="msg">${msg}</div>
     <div class="hint">${G.result===-1?"Both cards ride on the next round.":"Winner leads the next round."}</div></div>
-    <button class="btn" id="nextBtn">Next round →</button>
+    <button class="btn nextBtn">Next round →</button>
   </div>`;
 }
 
@@ -598,18 +600,17 @@ function render(){
   const face = side => showBoth ? G.shown[side] : G.hands[side][0];
   const leftCard  = (showBoth || l===0) ? cardHTML(face(0),0, G.phase==="pick" && l===0) : backHTML(0);
   const rightCard = (showBoth || l===1) ? cardHTML(face(1),1, G.phase==="pick" && l===1 && G.mode!=="cpu") : backHTML(1);
+  const prompt = promptHTML();
 
   app.innerHTML = `<div class="table">
-    ${railHTML(0)}
+    <div class="railcol">${railHTML(0)}${prompt}</div>
     <div class="arena">${leftCard}${rightCard}</div>
-    ${railHTML(1)}
+    <div class="railcol">${railHTML(1)}${prompt}</div>
   </div>
-  ${promptHTML()}
   ${logHTML()}`;
 
   app.querySelectorAll("button.statrow").forEach(b=>b.onclick=()=>choose(b.dataset.stat));
-  const nb = document.getElementById("nextBtn");
-  if(nb) nb.onclick = next;
+  app.querySelectorAll("button.nextBtn").forEach(b=>b.onclick=next);
 }
 
 document.addEventListener("keydown", e=>{
