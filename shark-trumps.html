@@ -144,6 +144,9 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   overflow:hidden;
 }
 .plate svg{width:82%;height:82%;color:var(--bone);opacity:.92}
+.plate img{width:100%;height:100%;object-fit:contain;object-position:center 40%;display:block;
+  filter:saturate(.92) contrast(1.03);opacity:0}
+.plate img.loaded{opacity:1;transition:opacity .25s}
 .plate .platetag{position:absolute;left:10px;bottom:8px;font-family:"IBM Plex Mono",monospace;
   font-size:9.5px;letter-spacing:.1em;color:var(--ash-dim);text-transform:uppercase;
   background:rgba(12,18,22,.55);padding:2px 6px;border-radius:2px;backdrop-filter:blur(2px)}
@@ -245,37 +248,39 @@ button.statrow:hover .lab{color:var(--bone)}
    Rarity Index is a 1–100 scale from IUCN status + range size.
    ============================================================ */
 const DECK = [
-  {n:"Great White Shark",       s:"Carcharodon carcharias",    f:"Lamnidae",           i:"VU", a:"lamnid",       ln:460,  wt:1100,  sp:40, dg:5, lf:70,  ra:56},
-  {n:"Shortfin Mako",           s:"Isurus oxyrinchus",         f:"Lamnidae",           i:"EN", a:"lamnid",       ln:320,  wt:135,   sp:74, dg:3, lf:32,  ra:63},
-  {n:"Porbeagle",               s:"Lamna nasus",               f:"Lamnidae",           i:"VU", a:"lamnid",       ln:250,  wt:135,   sp:50, dg:2, lf:45,  ra:54},
-  {n:"Tiger Shark",             s:"Galeocerdo cuvier",         f:"Carcharhinidae",     i:"NT", a:"requiem",      ln:420,  wt:630,   sp:32, dg:5, lf:27,  ra:41},
-  {n:"Bull Shark",              s:"Carcharhinus leucas",       f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:240,  wt:130,   sp:40, dg:5, lf:24,  ra:45},
-  {n:"Blue Shark",              s:"Prionace glauca",           f:"Carcharhinidae",     i:"NT", a:"requiem",      ln:300,  wt:90,    sp:43, dg:2, lf:20,  ra:33},
-  {n:"Oceanic Whitetip Shark",  s:"Carcharhinus longimanus",   f:"Carcharhinidae",     i:"CR", a:"requiem",      ln:300,  wt:170,   sp:24, dg:4, lf:25,  ra:80},
-  {n:"Lemon Shark",             s:"Negaprion brevirostris",    f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:300,  wt:180,   sp:32, dg:2, lf:27,  ra:47},
-  {n:"Blacktip Reef Shark",     s:"Carcharhinus melanopterus", f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:160,  wt:45,    sp:32, dg:1, lf:13,  ra:44},
-  {n:"Caribbean Reef Shark",    s:"Carcharhinus perezi",       f:"Carcharhinidae",     i:"EN", a:"requiem",      ln:250,  wt:70,    sp:30, dg:2, lf:20,  ra:60},
-  {n:"Grey Reef Shark",         s:"Carcharhinus amblyrhynchos",f:"Carcharhinidae",     i:"EN", a:"requiem",      ln:190,  wt:34,    sp:40, dg:2, lf:25,  ra:55},
-  {n:"Great Hammerhead",        s:"Sphyrna mokarran",          f:"Sphyrnidae",         i:"CR", a:"hammerhead",   ln:350,  wt:230,   sp:40, dg:3, lf:44,  ra:82},
-  {n:"Scalloped Hammerhead",    s:"Sphyrna lewini",            f:"Sphyrnidae",         i:"CR", a:"hammerhead",   ln:250,  wt:80,    sp:40, dg:2, lf:35,  ra:79},
-  {n:"Bonnethead",              s:"Sphyrna tiburo",            f:"Sphyrnidae",         i:"LC", a:"hammerhead",   ln:120,  wt:11,    sp:25, dg:1, lf:18,  ra:30},
-  {n:"Whale Shark",             s:"Rhincodon typus",           f:"Rhincodontidae",     i:"EN", a:"whaleshark",   ln:1200, wt:19000, sp:5,  dg:1, lf:120, ra:71},
-  {n:"Basking Shark",           s:"Cetorhinus maximus",        f:"Cetorhinidae",       i:"EN", a:"basking",      ln:800,  wt:5000,  sp:6,  dg:1, lf:50,  ra:68},
-  {n:"Megamouth Shark",         s:"Megachasma pelagios",       f:"Megachasmidae",      i:"LC", a:"megamouth",    ln:550,  wt:1200,  sp:8,  dg:1, lf:100, ra:74},
-  {n:"Common Thresher",         s:"Alopias vulpinus",          f:"Alopiidae",          i:"VU", a:"thresher",     ln:570,  wt:340,   sp:48, dg:1, lf:50,  ra:58},
-  {n:"Pelagic Thresher",        s:"Alopias pelagicus",         f:"Alopiidae",          i:"EN", a:"thresher",     ln:350,  wt:70,    sp:40, dg:1, lf:29,  ra:66},
-  {n:"Nurse Shark",             s:"Ginglymostoma cirratum",    f:"Ginglymostomatidae", i:"VU", a:"nurse",        ln:300,  wt:110,   sp:15, dg:1, lf:25,  ra:38},
-  {n:"Zebra Shark",             s:"Stegostoma tigrinum",       f:"Stegostomatidae",    i:"EN", a:"nurse",        ln:250,  wt:30,    sp:8,  dg:1, lf:30,  ra:61},
-  {n:"Sand Tiger Shark",        s:"Carcharias taurus",         f:"Odontaspididae",     i:"CR", a:"sandtiger",    ln:320,  wt:160,   sp:20, dg:2, lf:40,  ra:63},
-  {n:"Greenland Shark",         s:"Somniosus microcephalus",   f:"Somniosidae",        i:"VU", a:"greenland",    ln:500,  wt:900,   sp:3,  dg:1, lf:300, ra:64},
-  {n:"Goblin Shark",            s:"Mitsukurina owstoni",       f:"Mitsukurinidae",     i:"LC", a:"goblin",       ln:380,  wt:200,   sp:15, dg:1, lf:60,  ra:55},
-  {n:"Frilled Shark",           s:"Chlamydoselachus anguineus",f:"Chlamydoselachidae", i:"LC", a:"frilled",      ln:200,  wt:40,    sp:8,  dg:1, lf:25,  ra:57},
-  {n:"Spiny Dogfish",           s:"Squalus acanthias",         f:"Squalidae",          i:"VU", a:"dogfish",      ln:120,  wt:9,     sp:15, dg:1, lf:70,  ra:30},
-  {n:"Angel Shark",             s:"Squatina squatina",         f:"Squatinidae",        i:"CR", a:"angel",        ln:180,  wt:35,    sp:10, dg:2, lf:35,  ra:85},
-  {n:"Spotted Wobbegong",       s:"Orectolobus maculatus",     f:"Orectolobidae",      i:"LC", a:"wobbegong",    ln:170,  wt:25,    sp:6,  dg:2, lf:30,  ra:35},
-  {n:"Smallspotted Catshark",   s:"Scyliorhinus canicula",     f:"Scyliorhinidae",     i:"LC", a:"catshark",     ln:80,   wt:1.3,   sp:8,  dg:1, lf:12,  ra:12},
-  {n:"Cookiecutter Shark",      s:"Isistius brasiliensis",     f:"Dalatiidae",         i:"LC", a:"cookiecutter", ln:50,   wt:1,     sp:12, dg:2, lf:22,  ra:42}
+  {n:"Great White Shark",       s:"Carcharodon carcharias",    f:"Lamnidae",           i:"VU", a:"lamnid",       ln:460,  wt:1100,  sp:40, dg:5, lf:70,  ra:56, img:"great-white-shark.jpg"},
+  {n:"Shortfin Mako",           s:"Isurus oxyrinchus",         f:"Lamnidae",           i:"EN", a:"lamnid",       ln:320,  wt:135,   sp:74, dg:3, lf:32,  ra:63, img:"shortfin-mako.jpg"},
+  {n:"Porbeagle",               s:"Lamna nasus",               f:"Lamnidae",           i:"VU", a:"lamnid",       ln:250,  wt:135,   sp:50, dg:2, lf:45,  ra:54, img:"porbeagle.jpg"},
+  {n:"Tiger Shark",             s:"Galeocerdo cuvier",         f:"Carcharhinidae",     i:"NT", a:"requiem",      ln:420,  wt:630,   sp:32, dg:5, lf:27,  ra:41, img:"tiger-shark.jpg"},
+  {n:"Bull Shark",              s:"Carcharhinus leucas",       f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:240,  wt:130,   sp:40, dg:5, lf:24,  ra:45, img:"bull-shark.jpg"},
+  {n:"Blue Shark",              s:"Prionace glauca",           f:"Carcharhinidae",     i:"NT", a:"requiem",      ln:300,  wt:90,    sp:43, dg:2, lf:20,  ra:33, img:"blue-shark.jpg"},
+  {n:"Oceanic Whitetip Shark",  s:"Carcharhinus longimanus",   f:"Carcharhinidae",     i:"CR", a:"requiem",      ln:300,  wt:170,   sp:24, dg:4, lf:25,  ra:80, img:"oceanic-whitetip-shark.jpg"},
+  {n:"Lemon Shark",             s:"Negaprion brevirostris",    f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:300,  wt:180,   sp:32, dg:2, lf:27,  ra:47, img:"lemon-shark.jpg"},
+  {n:"Blacktip Reef Shark",     s:"Carcharhinus melanopterus", f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:160,  wt:45,    sp:32, dg:1, lf:13,  ra:44, img:"blacktip-reef-shark.jpg"},
+  {n:"Caribbean Reef Shark",    s:"Carcharhinus perezi",       f:"Carcharhinidae",     i:"EN", a:"requiem",      ln:250,  wt:70,    sp:30, dg:2, lf:20,  ra:60, img:"caribbean-reef-shark.jpg"},
+  {n:"Grey Reef Shark",         s:"Carcharhinus amblyrhynchos",f:"Carcharhinidae",     i:"EN", a:"requiem",      ln:190,  wt:34,    sp:40, dg:2, lf:25,  ra:55, img:"grey-reef-shark.jpg"},
+  {n:"Great Hammerhead",        s:"Sphyrna mokarran",          f:"Sphyrnidae",         i:"CR", a:"hammerhead",   ln:350,  wt:230,   sp:40, dg:3, lf:44,  ra:82, img:"great-hammerhead.jpg"},
+  {n:"Scalloped Hammerhead",    s:"Sphyrna lewini",            f:"Sphyrnidae",         i:"CR", a:"hammerhead",   ln:250,  wt:80,    sp:40, dg:2, lf:35,  ra:79, img:"scalloped-hammerhead.jpg"},
+  {n:"Bonnethead",              s:"Sphyrna tiburo",            f:"Sphyrnidae",         i:"LC", a:"hammerhead",   ln:120,  wt:11,    sp:25, dg:1, lf:18,  ra:30, img:"bonnethead.jpg"},
+  {n:"Whale Shark",             s:"Rhincodon typus",           f:"Rhincodontidae",     i:"EN", a:"whaleshark",   ln:1200, wt:19000, sp:5,  dg:1, lf:120, ra:71, img:"whale-shark.jpg"},
+  {n:"Basking Shark",           s:"Cetorhinus maximus",        f:"Cetorhinidae",       i:"EN", a:"basking",      ln:800,  wt:5000,  sp:6,  dg:1, lf:50,  ra:68, img:"basking-shark.jpg"},
+  {n:"Megamouth Shark",         s:"Megachasma pelagios",       f:"Megachasmidae",      i:"LC", a:"megamouth",    ln:550,  wt:1200,  sp:8,  dg:1, lf:100, ra:74, img:"megamouth-shark.jpg"},
+  {n:"Common Thresher",         s:"Alopias vulpinus",          f:"Alopiidae",          i:"VU", a:"thresher",     ln:570,  wt:340,   sp:48, dg:1, lf:50,  ra:58, img:"common-thresher.jpg"},
+  {n:"Pelagic Thresher",        s:"Alopias pelagicus",         f:"Alopiidae",          i:"EN", a:"thresher",     ln:350,  wt:70,    sp:40, dg:1, lf:29,  ra:66, img:"pelagic-thresher.jpg"},
+  {n:"Nurse Shark",             s:"Ginglymostoma cirratum",    f:"Ginglymostomatidae", i:"VU", a:"nurse",        ln:300,  wt:110,   sp:15, dg:1, lf:25,  ra:38, img:"nurse-shark.jpg"},
+  {n:"Zebra Shark",             s:"Stegostoma tigrinum",       f:"Stegostomatidae",    i:"EN", a:"nurse",        ln:250,  wt:30,    sp:8,  dg:1, lf:30,  ra:61, img:"zebra-shark.jpg"},
+  {n:"Sand Tiger Shark",        s:"Carcharias taurus",         f:"Odontaspididae",     i:"CR", a:"sandtiger",    ln:320,  wt:160,   sp:20, dg:2, lf:40,  ra:63, img:"sand-tiger-shark.jpg"},
+  {n:"Greenland Shark",         s:"Somniosus microcephalus",   f:"Somniosidae",        i:"VU", a:"greenland",    ln:500,  wt:900,   sp:3,  dg:1, lf:300, ra:64, img:"greenland-shark.jpg"},
+  {n:"Goblin Shark",            s:"Mitsukurina owstoni",       f:"Mitsukurinidae",     i:"LC", a:"goblin",       ln:380,  wt:200,   sp:15, dg:1, lf:60,  ra:55, img:"goblin-shark.jpg"},
+  {n:"Frilled Shark",           s:"Chlamydoselachus anguineus",f:"Chlamydoselachidae", i:"LC", a:"frilled",      ln:200,  wt:40,    sp:8,  dg:1, lf:25,  ra:57, img:"frilled-shark.jpg"},
+  {n:"Spiny Dogfish",           s:"Squalus acanthias",         f:"Squalidae",          i:"VU", a:"dogfish",      ln:120,  wt:9,     sp:15, dg:1, lf:70,  ra:30, img:"spiny-dogfish.jpg"},
+  {n:"Angel Shark",             s:"Squatina squatina",         f:"Squatinidae",        i:"CR", a:"angel",        ln:180,  wt:35,    sp:10, dg:2, lf:35,  ra:85, img:"angel-shark.jpg"},
+  {n:"Spotted Wobbegong",       s:"Orectolobus maculatus",     f:"Orectolobidae",      i:"LC", a:"wobbegong",    ln:170,  wt:25,    sp:6,  dg:2, lf:30,  ra:35, img:"spotted-wobbegong.jpg"},
+  {n:"Smallspotted Catshark",   s:"Scyliorhinus canicula",     f:"Scyliorhinidae",     i:"LC", a:"catshark",     ln:80,   wt:1.3,   sp:8,  dg:1, lf:12,  ra:12, img:"smallspotted-catshark.jpg"},
+  {n:"Cookiecutter Shark",      s:"Isistius brasiliensis",     f:"Dalatiidae",         i:"LC", a:"cookiecutter", ln:50,   wt:1,     sp:12, dg:2, lf:22,  ra:42, img:"cookiecutter-shark.jpg"}
 ];
+
+const IMG_DIR = "images/sharks/";
 
 const STATS = [
   {k:"ln", label:"Length",      unit:"cm",   fmt:v=>v},
@@ -524,7 +529,12 @@ function statRows(card, side, interactive){
 }
 
 function plateHTML(card){
-  return `${silhouette(card.a)}<span class="platetag">${esc(card.n)}</span>`;
+  const fallback = silhouette(card.a);
+  if(!card.img) return `${fallback}<span class="platetag">${esc(card.n)}</span>`;
+  return `${fallback}<img src="${IMG_DIR}${card.img}" alt="${esc(card.n)}" loading="lazy"
+      onload="this.classList.add('loaded');this.previousElementSibling.style.display='none'"
+      onerror="this.remove()">
+    <span class="platetag">${esc(card.n)}</span>`;
 }
 
 function cardHTML(card, side, interactive){
@@ -645,7 +655,7 @@ function menu(){
         <div class="legend-row"><span>Top speed</span><span>burst, not cruising pace</span></div>
         <div class="legend-row"><span>Danger</span><span>recorded risk to humans, 1–5</span></div>
         <div class="legend-row"><span>Rarity Index</span><span>IUCN status + range size</span></div>
-        <p style="font-size:12.5px;margin-top:12px">Figures are rounded field-guide values chosen to play well, not to settle arguments. Lengths include the tail — a thresher gets about half of its from that upper lobe. All card art is stylised silhouettes grouped by body plan (mackerel sharks, requiem sharks, hammerheads, carpet sharks and so on).</p>
+        <p style="font-size:12.5px;margin-top:12px">Figures are rounded field-guide values chosen to play well, not to settle arguments. Lengths include the tail — a thresher gets about half of its from that upper lobe. Photos are sourced from Wikimedia Commons under free-culture licences (CC BY / CC BY-SA / CC0 / public domain) and credited in <code>images/sharks/CREDITS.md</code>; stylised silhouettes fill in for any species whose image fails to load.</p>
       </div>
     </div>
   </div>`;
