@@ -13,7 +13,7 @@ the file link for the full licence terms and the original resolution.
 | Bonnethead | `bonnethead.jpg` | [Sphyrna_tiburo_SI.jpg](https://commons.wikimedia.org/wiki/File:Sphyrna_tiburo_SI.jpg) | D Ross Robertson | Public domain |
 | Bull Shark | `bull-shark.jpg` | [Bull_shark_(Carcharhinus_leucas).jpg](https://commons.wikimedia.org/wiki/File:Bull_shark_(Carcharhinus_leucas).jpg) | João D'Andretta | CC BY 4.0 |
 | Caribbean Reef Shark | `caribbean-reef-shark.jpg` | [Caribbean_reef_sharks2.jpg](https://commons.wikimedia.org/wiki/File:Caribbean_reef_sharks2.jpg) | Albert Kok3 | CC0 |
-| Common Thresher | `common-thresher.jpg` | [Alopias_vulpinus_noaa2.jpg](https://commons.wikimedia.org/wiki/File:Alopias_vulpinus_noaa2.jpg) | NOAA/PIER | Public domain |
+| Common Thresher | `common-thresher.jpg` | [Thresher shark jumping.jpg](https://commons.wikimedia.org/wiki/File:Thresher_shark_jumping.jpg) | Steve Momot | CC BY-SA 4.0 |
 | Cookiecutter Shark | `cookiecutter-shark.jpg` | [Isistius_brasiliensis.jpg](https://commons.wikimedia.org/wiki/File:Isistius_brasiliensis.jpg) | NOAA Observer Project | Public domain |
 | Frilled Shark | `frilled-shark.jpg` | [Chlamydoselachus anguineus2.jpg](https://commons.wikimedia.org/wiki/File:Chlamydoselachus_anguineus2.jpg) | This illustration was made by Citron You must credit this : Citron / C | CC BY-SA 3.0 |
 | Goblin Shark | `goblin-shark.jpg` | [Goblin_shark_(Mitsukurina_owstoni).jpg](https://commons.wikimedia.org/wiki/File:Goblin_shark_(Mitsukurina_owstoni).jpg) | Michigan State University/USFWS | Public domain |
@@ -22,11 +22,11 @@ the file link for the full licence terms and the original resolution.
 | Greenland Shark | `greenland-shark.jpg` | [Somniosus_microcephalus_okeanos.jpg](https://commons.wikimedia.org/wiki/File:Somniosus_microcephalus_okeanos.jpg) | NOAA Okeanos Explorer Program | Public domain |
 | Grey Reef Shark | `grey-reef-shark.jpg` | [Corl0207_(28225976491).jpg](https://commons.wikimedia.org/wiki/File:Corl0207_(28225976491).jpg) | NOAA Photo Library | CC BY 2.0 |
 | Lemon Shark | `lemon-shark.jpg` | [Lemonshark.JPG](https://commons.wikimedia.org/wiki/File:Lemonshark.JPG) | Albert Kok (talk) | CC BY-SA 3.0 |
-| Megamouth Shark | `megamouth-shark.jpg` | [Akula 180416.jpg](https://commons.wikimedia.org/wiki/File:Akula_180416.jpg) | Sergei Boka | CC BY-SA 4.0 |
+| Megamouth Shark | `megamouth-shark.jpg` | [Megamouth shark japan.jpg](https://commons.wikimedia.org/wiki/File:Megamouth_shark_japan.jpg) | OpenCage | CC BY-SA 2.5 |
 | Nurse Shark | `nurse-shark.jpg` | [Nurse_shark.jpg](https://commons.wikimedia.org/wiki/File:Nurse_shark.jpg) | Unknown | Public domain |
 | Oceanic Whitetip Shark | `oceanic-whitetip-shark.jpg` | [Oceanic_Whitetip_Shark_(cropped).jpg](https://commons.wikimedia.org/wiki/File:Oceanic_Whitetip_Shark_(cropped).jpg) | Johan Lantz, Malmö SWEDEN | CC BY-SA 3.0 |
 | Pelagic Thresher | `pelagic-thresher.jpg` | [Pelagic_thresher_shark_(Alopias_pelagicus)_(cropped).jpg](https://commons.wikimedia.org/wiki/File:Pelagic_thresher_shark_(Alopias_pelagicus)_(cropped).jpg) | Pierre Pericard | CC BY 4.0 |
-| Porbeagle | `porbeagle.jpg` | [One that didn't get away - a Porbeagle shark - geograph.org.uk - 5982436.jpg](https://commons.wikimedia.org/wiki/File:One_that_didn%27t_get_away_-_a_Porbeagle_shark_-_geograph.org.uk_-_5982436.jpg) | Des Colhoun | CC BY-SA 2.0 |
+| Porbeagle | `porbeagle.jpg` | [Museu d'Història Natural, marraix.jpg](https://commons.wikimedia.org/wiki/File:Museu_d%27Hist%C3%B2ria_Natural,_marraix.jpg) | Enfo | CC BY-SA 3.0 |
 | Sand Tiger Shark | `sand-tiger-shark.jpg` | [Sand_tiger_shark_(Carcharias_taurus).jpg](https://commons.wikimedia.org/wiki/File:Sand_tiger_shark_(Carcharias_taurus).jpg) | Bryce Watts-Parker | CC BY 4.0 |
 | Scalloped Hammerhead | `scalloped-hammerhead.jpg` | [Scalloped_hammerhead_shark_(Sphyrna_lewini)_Costa_Rica_(cropped).jpg](https://commons.wikimedia.org/wiki/File:Scalloped_hammerhead_shark_(Sphyrna_lewini)_Costa_Rica_(cropped).jpg) | Kris-Mikael Krister | CC BY 2.0 |
 | Shortfin Mako | `shortfin-mako.jpg` | [Shortfin_mako_(Isurus_oxyrinchus).jpg](https://commons.wikimedia.org/wiki/File:Shortfin_mako_(Isurus_oxyrinchus).jpg) | Fábio Olmos | CC BY 4.0 |
