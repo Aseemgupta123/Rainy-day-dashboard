@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shark Trumps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark}
+html,body{margin:0}
+img{max-width:100%}
+
+:root{
+  --abyss:#0C1216;
+  --slate:#161F26;
+  --slate-2:#1E2A33;
+  --slate-3:#27353F;
+  --line:#33444F;
+  --bone:#EAE4D6;
+  --ash:#8FA0AB;
+  --ash-dim:#61727D;
+  --iris:#F0A81E;
+  --iris-deep:#8A5F0C;
+  --teal:#4FB3A8;
+  --teal-deep:#1F5C57;
+  --moss:#7FB069;
+  --rust:#C4574A;
+  --shadow:0 18px 44px -18px rgba(0,0,0,.85);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 620px at 50% -14%, #1D2B34 0%, rgba(29,43,52,0) 62%),
+    var(--abyss);
+  color:var(--bone);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--iris);outline-offset:3px}
+
+.wrap{max-width:1420px;margin:0 auto;padding:22px 20px 56px}
+
+/* ---------- masthead ---------- */
+.mast{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:22px}
+.mast h1{
+  font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:34px;line-height:1;
+  margin:0;letter-spacing:-.01em;
+}
+.mast h1 em{font-style:normal;color:var(--iris)}
+.mast .sub{font-size:12px;color:var(--ash-dim);letter-spacing:.14em;text-transform:uppercase;margin-top:7px}
+.mast .meta{display:flex;gap:22px;align-items:flex-end}
+.meta-cell{text-align:right}
+.meta-cell .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash-dim)}
+.meta-cell .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-variant-numeric:tabular-nums;color:var(--bone)}
+
+/* ---------- menu ---------- */
+.menu{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:start;margin-top:14px}
+@media(max-width:820px){.menu{grid-template-columns:1fr}}
+.menu-lede{font-family:"Fraunces",Georgia,serif;font-size:26px;line-height:1.3;margin:0 0 14px;max-width:22ch;text-wrap:balance}
+.menu p{color:var(--ash);max-width:62ch;margin:0 0 16px}
+.rules{list-style:none;padding:0;margin:20px 0 0;border-top:1px solid var(--line)}
+.rules li{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);color:var(--ash);font-size:14px}
+.rules .n{font-family:"IBM Plex Mono",monospace;color:var(--iris);font-size:12px;padding-top:2px}
+.rules b{color:var(--bone);font-weight:500}
+
+.modes{display:flex;flex-direction:column;gap:12px}
+.mode{
+  display:block;width:100%;text-align:left;padding:16px 18px;
+  background:var(--slate);border:1px solid var(--line);border-radius:3px;
+  transition:border-color .16s,background .16s,transform .16s;
+}
+.mode:hover{border-color:var(--iris);background:var(--slate-2);transform:translateY(-1px)}
+.mode .t{font-family:"Fraunces",Georgia,serif;font-size:19px;font-weight:600}
+.mode .d{color:var(--ash);font-size:13px;margin-top:3px}
+.mode .go{float:right;color:var(--iris);font-family:"IBM Plex Mono",monospace;font-size:13px}
+
+.legend{margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+.legend h3{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash-dim);margin:0 0 10px;font-weight:600}
+.legend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px}
+.legend-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ash);
+  border-bottom:1px dotted var(--line);padding-bottom:5px}
+.legend-row span:last-child{font-family:"IBM Plex Mono",monospace;color:var(--ash-dim);white-space:nowrap}
+
+/* ---------- table (play area) ---------- */
+.table{display:grid;grid-template-columns:170px 1fr 170px;gap:20px;align-items:start}
+@media(max-width:900px){.table{grid-template-columns:1fr;gap:14px}}
+
+.railcol{display:flex;flex-direction:column;gap:16px}
+
+.rail{background:var(--slate);border:1px solid var(--line);border-radius:3px;padding:14px}
+.rail.p2{border-color:var(--line)}
+.rail.active{border-color:var(--iris);box-shadow:inset 3px 0 0 var(--iris)}
+.rail.p2.active{box-shadow:inset -3px 0 0 var(--teal);border-color:var(--teal)}
+.rail .who{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash-dim)}
+.rail .nm{font-family:"Fraunces",Georgia,serif;font-size:20px;font-weight:600;margin-top:2px}
+.rail.p1 .nm{color:var(--iris)}
+.rail.p2 .nm{color:var(--teal)}
+.rail .count{font-family:"IBM Plex Mono",monospace;font-size:36px;line-height:1;margin-top:10px;font-variant-numeric:tabular-nums}
+.rail .cl{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ash-dim);margin-top:2px}
+.stack{display:flex;flex-wrap:wrap;gap:2px;margin-top:12px}
+.tick{width:7px;height:14px;background:var(--slate-3);border-radius:1px}
+.rail.p1 .tick.on{background:var(--iris)}
+.rail.p2 .tick.on{background:var(--teal)}
+.turnflag{margin-top:12px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ash-dim)}
+.rail.active .turnflag{color:var(--bone)}
+
+.arena{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.arena{grid-template-columns:1fr}}
+
+/* ---------- card ---------- */
+.card{
+  background:linear-gradient(180deg,var(--slate-2) 0%,var(--slate) 46%);
+  border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;
+}
+.card.p1{border-top:3px solid var(--iris)}
+.card.p2{border-top:3px solid var(--teal)}
+.card-head{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
+.card-owner{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash-dim);display:flex;justify-content:space-between}
+.card.p1 .card-owner b{color:var(--iris);font-weight:500}
+.card.p2 .card-owner b{color:var(--teal);font-weight:500}
+.card-name{font-family:"Fraunces",Georgia,serif;font-size:23px;font-weight:700;line-height:1.12;margin-top:6px;text-wrap:balance}
+.card-sci{font-style:italic;color:var(--ash);font-size:13px;margin-top:2px}
+.chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;padding:2px 7px;border:1px solid var(--line);border-radius:2px;color:var(--ash)}
+.chip.iucn{border-color:currentColor}
+.iucn-LC{color:var(--moss)}.iucn-NT{color:#B9B056}.iucn-VU{color:var(--iris)}
+.iucn-EN{color:#D9814B}.iucn-CR{color:var(--rust)}
+
+.plate{
+  position:relative;background:
+    repeating-linear-gradient(180deg,rgba(255,255,255,.022) 0 1px,transparent 1px 5px),
+    radial-gradient(120% 80% at 50% 20%, #22323C 0%, #131C22 78%);
+  border-bottom:1px solid var(--line);
+  aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.plate svg{width:82%;height:82%;color:var(--bone);opacity:.92}
+.plate .platetag{position:absolute;left:10px;bottom:8px;font-family:"IBM Plex Mono",monospace;
+  font-size:9.5px;letter-spacing:.1em;color:var(--ash-dim);text-transform:uppercase;
+  background:rgba(12,18,22,.55);padding:2px 6px;border-radius:2px;backdrop-filter:blur(2px)}
+
+.stats{list-style:none;margin:0;padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px}
+.statrow{
+  display:grid;grid-template-columns:16px 1fr auto;gap:9px;align-items:center;
+  width:100%;text-align:left;padding:7px 8px;border-radius:3px;border:1px solid transparent;
+  transition:background .13s,border-color .13s;position:relative;
+}
+.statrow .key{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ash-dim)}
+.statrow .lab{font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ash)}
+.statrow .val{font-family:"IBM Plex Mono",monospace;font-size:15px;font-variant-numeric:tabular-nums;color:var(--bone)}
+.statrow .val u{text-decoration:none;font-size:10px;color:var(--ash-dim);margin-left:3px}
+button.statrow{cursor:pointer}
+button.statrow:hover{background:var(--slate-3);border-color:var(--line)}
+button.statrow:hover .lab{color:var(--bone)}
+.statrow.picked{background:rgba(240,168,30,.10);border-color:var(--iris)}
+.card.p2 .statrow.picked{background:rgba(79,179,168,.10);border-color:var(--teal)}
+.statrow.picked .lab{color:var(--bone)}
+.statrow.win .val{color:var(--moss)}
+.statrow.lose .val{color:var(--rust)}
+
+/* card back */
+.card.back{align-items:stretch;justify-content:center;background:var(--slate);position:relative;min-height:420px}
+.backfill{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:
+    repeating-linear-gradient(135deg,rgba(255,255,255,.028) 0 2px,transparent 2px 11px),
+    repeating-linear-gradient(-135deg,rgba(255,255,255,.028) 0 2px,transparent 2px 11px),
+    var(--slate);
+  margin:9px;border:1px solid var(--line);border-radius:2px;
+}
+.backfill .emblem{width:72px;height:72px;color:var(--teal);opacity:.75}
+.backfill .bt{font-family:"Fraunces",Georgia,serif;font-size:16px;color:var(--ash)}
+.backfill .bs{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ash-dim)}
+
+/* ---------- prompt / verdict ---------- */
+.prompt{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  background:var(--slate);border:1px solid var(--line);border-left:3px solid var(--iris);
+  border-radius:3px;padding:12px 16px;
+}
+.prompt.teal{border-left-color:var(--teal)}
+.prompt.win{border-left-color:var(--moss)}
+.prompt.lose{border-left-color:var(--rust)}
+.prompt.draw{border-left-color:var(--ash)}
+.prompt .msg{font-family:"Fraunces",Georgia,serif;font-size:18px;line-height:1.3}
+.prompt .hint{font-size:12px;color:var(--ash-dim);margin-top:2px}
+.prompt .msg b{color:var(--iris);font-weight:700}
+.prompt .msg b.t{color:var(--teal)}
+.btn{
+  background:var(--iris);color:#14100A;font-weight:600;font-size:14px;
+  padding:10px 20px;border-radius:3px;letter-spacing:.02em;white-space:nowrap;
+  transition:filter .15s,transform .15s;
+}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ash)}
+.btn.ghost:hover{color:var(--bone);border-color:var(--ash)}
+
+.pot{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--iris);letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- log ---------- */
+.log{margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
+.log h3{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash-dim);margin:0 0 8px;font-weight:600}
+.log ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column-reverse;max-height:168px;overflow-y:auto}
+.log li{display:grid;grid-template-columns:34px 1fr auto;gap:12px;font-size:12.5px;color:var(--ash);
+  padding:6px 2px;border-bottom:1px solid rgba(51,68,79,.5)}
+.log .r{font-family:"IBM Plex Mono",monospace;color:var(--ash-dim);font-size:11px}
+.log .o{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.log .o.a{color:var(--iris)}.log .o.b{color:var(--teal)}.log .o.d{color:var(--ash-dim)}
+.log em{font-style:italic;color:var(--bone)}
+
+/* ---------- game over ---------- */
+.over{text-align:center;padding:46px 20px;background:var(--slate);border:1px solid var(--line);border-radius:4px}
+.over .crest{width:120px;height:120px;margin:0 auto 12px;color:var(--iris)}
+.over h2{font-family:"Fraunces",Georgia,serif;font-size:38px;margin:0 0 6px;line-height:1.1}
+.over p{color:var(--ash);margin:0 0 22px}
+.over .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <h1>Shark <em>Trumps</em></h1>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+/* ============================================================
+   DATA — 30 sharks. Figures are typical adult / documented maxima.
+   Rarity Index is a 1–100 scale from IUCN status + range size.
+   ============================================================ */
+const DECK = [
+  {n:"Great White Shark",       s:"Carcharodon carcharias",    f:"Lamnidae",           i:"VU", a:"lamnid",       ln:460,  wt:1100,  sp:40, dg:5, lf:70,  ra:56},
+  {n:"Shortfin Mako",           s:"Isurus oxyrinchus",         f:"Lamnidae",           i:"EN", a:"lamnid",       ln:320,  wt:135,   sp:74, dg:3, lf:32,  ra:63},
+  {n:"Porbeagle",               s:"Lamna nasus",               f:"Lamnidae",           i:"VU", a:"lamnid",       ln:250,  wt:135,   sp:50, dg:2, lf:45,  ra:54},
+  {n:"Tiger Shark",             s:"Galeocerdo cuvier",         f:"Carcharhinidae",     i:"NT", a:"requiem",      ln:420,  wt:630,   sp:32, dg:5, lf:27,  ra:41},
+  {n:"Bull Shark",              s:"Carcharhinus leucas",       f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:240,  wt:130,   sp:40, dg:5, lf:24,  ra:45},
+  {n:"Blue Shark",              s:"Prionace glauca",           f:"Carcharhinidae",     i:"NT", a:"requiem",      ln:300,  wt:90,    sp:43, dg:2, lf:20,  ra:33},
+  {n:"Oceanic Whitetip Shark",  s:"Carcharhinus longimanus",   f:"Carcharhinidae",     i:"CR", a:"requiem",      ln:300,  wt:170,   sp:24, dg:4, lf:25,  ra:80},
+  {n:"Lemon Shark",             s:"Negaprion brevirostris",    f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:300,  wt:180,   sp:32, dg:2, lf:27,  ra:47},
+  {n:"Blacktip Reef Shark",     s:"Carcharhinus melanopterus", f:"Carcharhinidae",     i:"VU", a:"requiem",      ln:160,  wt:45,    sp:32, dg:1, lf:13,  ra:44},
+  {n:"Caribbean Reef Shark",    s:"Carcharhinus perezi",       f:"Carcharhinidae",     i:"EN", a:"requiem",      ln:250,  wt:70,    sp:30, dg:2, lf:20,  ra:60},
+  {n:"Grey Reef Shark",         s:"Carcharhinus amblyrhynchos",f:"Carcharhinidae",     i:"EN", a:"requiem",      ln:190,  wt:34,    sp:40, dg:2, lf:25,  ra:55},
+  {n:"Great Hammerhead",        s:"Sphyrna mokarran",          f:"Sphyrnidae",         i:"CR", a:"hammerhead",   ln:350,  wt:230,   sp:40, dg:3, lf:44,  ra:82},
+  {n:"Scalloped Hammerhead",    s:"Sphyrna lewini",            f:"Sphyrnidae",         i:"CR", a:"hammerhead",   ln:250,  wt:80,    sp:40, dg:2, lf:35,  ra:79},
+  {n:"Bonnethead",              s:"Sphyrna tiburo",            f:"Sphyrnidae",         i:"LC", a:"hammerhead",   ln:120,  wt:11,    sp:25, dg:1, lf:18,  ra:30},
+  {n:"Whale Shark",             s:"Rhincodon typus",           f:"Rhincodontidae",     i:"EN", a:"whaleshark",   ln:1200, wt:19000, sp:5,  dg:1, lf:120, ra:71},
+  {n:"Basking Shark",           s:"Cetorhinus maximus",        f:"Cetorhinidae",       i:"EN", a:"basking",      ln:800,  wt:5000,  sp:6,  dg:1, lf:50,  ra:68},
+  {n:"Megamouth Shark",         s:"Megachasma pelagios",       f:"Megachasmidae",      i:"LC", a:"megamouth",    ln:550,  wt:1200,  sp:8,  dg:1, lf:100, ra:74},
+  {n:"Common Thresher",         s:"Alopias vulpinus",          f:"Alopiidae",          i:"VU", a:"thresher",     ln:570,  wt:340,   sp:48, dg:1, lf:50,  ra:58},
+  {n:"Pelagic Thresher",        s:"Alopias pelagicus",         f:"Alopiidae",          i:"EN", a:"thresher",     ln:350,  wt:70,    sp:40, dg:1, lf:29,  ra:66},
+  {n:"Nurse Shark",             s:"Ginglymostoma cirratum",    f:"Ginglymostomatidae", i:"VU", a:"nurse",        ln:300,  wt:110,   sp:15, dg:1, lf:25,  ra:38},
+  {n:"Zebra Shark",             s:"Stegostoma tigrinum",       f:"Stegostomatidae",    i:"EN", a:"nurse",        ln:250,  wt:30,    sp:8,  dg:1, lf:30,  ra:61},
+  {n:"Sand Tiger Shark",        s:"Carcharias taurus",         f:"Odontaspididae",     i:"CR", a:"sandtiger",    ln:320,  wt:160,   sp:20, dg:2, lf:40,  ra:63},
+  {n:"Greenland Shark",         s:"Somniosus microcephalus",   f:"Somniosidae",        i:"VU", a:"greenland",    ln:500,  wt:900,   sp:3,  dg:1, lf:300, ra:64},
+  {n:"Goblin Shark",            s:"Mitsukurina owstoni",       f:"Mitsukurinidae",     i:"LC", a:"goblin",       ln:380,  wt:200,   sp:15, dg:1, lf:60,  ra:55},
+  {n:"Frilled Shark",           s:"Chlamydoselachus anguineus",f:"Chlamydoselachidae", i:"LC", a:"frilled",      ln:200,  wt:40,    sp:8,  dg:1, lf:25,  ra:57},
+  {n:"Spiny Dogfish",           s:"Squalus acanthias",         f:"Squalidae",          i:"VU", a:"dogfish",      ln:120,  wt:9,     sp:15, dg:1, lf:70,  ra:30},
+  {n:"Angel Shark",             s:"Squatina squatina",         f:"Squatinidae",        i:"CR", a:"angel",        ln:180,  wt:35,    sp:10, dg:2, lf:35,  ra:85},
+  {n:"Spotted Wobbegong",       s:"Orectolobus maculatus",     f:"Orectolobidae",      i:"LC", a:"wobbegong",    ln:170,  wt:25,    sp:6,  dg:2, lf:30,  ra:35},
+  {n:"Smallspotted Catshark",   s:"Scyliorhinus canicula",     f:"Scyliorhinidae",     i:"LC", a:"catshark",     ln:80,   wt:1.3,   sp:8,  dg:1, lf:12,  ra:12},
+  {n:"Cookiecutter Shark",      s:"Isistius brasiliensis",     f:"Dalatiidae",         i:"LC", a:"cookiecutter", ln:50,   wt:1,     sp:12, dg:2, lf:22,  ra:42}
+];
+
+const STATS = [
+  {k:"ln", label:"Length",      unit:"cm",   fmt:v=>v},
+  {k:"wt", label:"Weight",      unit:"kg",   fmt:v=> v<10 ? +v.toFixed(1) : Math.round(v)},
+  {k:"sp", label:"Top Speed",   unit:"km/h", fmt:v=>v},
+  {k:"dg", label:"Danger",      unit:"/5",   fmt:v=>v},
+  {k:"lf", label:"Lifespan",    unit:"yrs",  fmt:v=>v},
+  {k:"ra", label:"Rarity Index",unit:"/100", fmt:v=>v}
+];
+
+/* ============================================================
+   SILHOUETTES — stylised side profiles grouped by body plan.
+   Head to the left; drawn solid, used as the card's plate art.
+   ============================================================ */
+const SHARK = {
+requiem:
+ `<path d="M14 66C34 52 64 42 100 40C138 39 168 46 190 58C205 47 220 33 234 20C229 38 224 52 221 64C224 76 228 86 231 96C217 87 203 78 190 74C168 86 138 93 100 92C64 90 34 80 14 66Z"/>`+
+ `<path d="M84 42C88 22 102 12 116 8C114 20 112 33 115 46Z"/>`+
+ `<path d="M70 80C76 100 92 114 108 120C98 106 92 92 94 80Z"/>`+
+ `<path d="M150 50C154 40 162 36 170 35C168 42 167 48 169 54Z"/>`+
+ `<path d="M116 86C120 98 128 106 136 109C130 99 127 91 128 84Z"/>`,
+
+lamnid:
+ `<path d="M12 66C30 50 56 40 92 38C132 37 164 44 188 58C202 46 216 30 230 14C226 34 221 52 219 66C221 80 226 98 230 116C216 100 202 86 188 74C164 88 132 95 92 94C56 92 30 82 12 66Z"/>`+
+ `<path d="M96 40C100 18 114 8 128 4C126 17 125 31 128 46Z"/>`+
+ `<path d="M74 80C82 104 100 120 118 126C106 110 98 94 100 80Z"/>`+
+ `<path d="M160 52C164 44 170 41 176 40C174 46 173 51 175 56Z"/>`,
+
+hammerhead:
+ `<path d="M6 38C6 34 10 32 16 32L28 32C36 32 43 38 46 47L50 60C51 64 51 66 50 70L46 83C43 92 36 98 28 98L16 98C10 98 6 96 6 92C6 88 9 86 12 83C15 74 15 56 12 47C9 44 6 42 6 38Z"/>`+
+ `<path d="M44 52C70 47 108 44 142 44C166 45 184 50 197 58C209 47 222 33 234 20C230 38 225 52 222 64C225 76 229 88 233 104C219 92 206 80 197 74C184 82 166 87 142 88C108 88 70 85 44 80C41 74 41 58 44 52Z"/>`+
+ `<path d="M96 44C100 18 114 6 128 1C126 16 125 30 128 46Z"/>`+
+ `<path d="M74 80C80 98 94 110 108 115C99 102 94 90 96 80Z"/>`,
+
+whaleshark:
+ `<path d="M10 52C10 44 22 40 40 40C100 38 160 46 190 60C202 50 216 36 228 24C224 40 219 54 217 66C219 80 224 96 228 114C216 102 204 88 190 76C160 92 100 100 40 98C22 98 10 94 10 86C16 74 16 64 10 52Z"/>`+
+ `<path d="M118 44C124 22 138 12 152 8C150 22 149 34 152 50Z"/>`+
+ `<path d="M164 52C168 42 176 38 182 37C180 44 179 50 181 56Z"/>`+
+ `<path d="M64 94C72 116 92 128 110 132C98 116 90 100 92 88Z"/>`,
+
+megamouth:
+ `<path d="M8 50C8 38 22 32 42 32C100 30 156 40 186 56C198 44 212 28 224 14C220 32 215 48 213 62C215 78 220 96 224 116C212 102 200 86 186 76C156 92 100 102 42 100C22 100 8 92 8 80C16 66 16 62 8 50Z"/>`+
+ `<path d="M118 40C124 26 136 20 148 20C146 30 145 40 148 52Z"/>`+
+ `<path d="M66 90C74 110 92 122 108 126C98 110 92 96 94 84Z"/>`,
+
+thresher:
+ `<path d="M14 66C32 54 60 46 96 44C130 43 158 48 180 60C182 64 182 72 180 76C158 86 130 91 96 90C60 88 32 80 14 66Z"/>`+
+ `<path d="M180 60C196 52 214 40 226 24C231 17 236 8 238 4C239 3 240 6 239 9C232 30 218 54 210 66C214 74 220 86 226 100C227 103 224 105 222 102C210 88 196 78 180 76C186 72 186 64 180 60Z"/>`+
+ `<path d="M84 46C88 28 100 18 112 14C110 26 109 37 112 48Z"/>`+
+ `<path d="M68 80C74 102 90 118 106 124C96 108 90 94 92 80Z"/>`,
+
+nurse:
+ `<path d="M16 60C18 52 26 48 40 47C90 45 140 48 178 58C180 64 180 76 178 82C140 92 90 95 40 93C26 92 18 88 16 80C13 74 13 66 16 60Z"/>`+
+ `<path d="M178 58C196 52 214 44 230 34C226 46 222 56 220 68C223 76 227 84 230 94C216 86 200 78 178 82Z"/>`+
+ `<path d="M114 48C118 34 130 28 142 28C140 36 138 44 141 52Z"/>`+
+ `<path d="M146 50C150 38 160 33 170 33C168 41 166 47 168 55Z"/>`+
+ `<path d="M58 82C62 98 74 108 86 112C80 100 76 90 78 80Z"/>`+
+ `<path d="M17 68C11 76 8 84 6 90C9 84 13 76 19 70Z"/>`,
+
+sandtiger:
+ `<path d="M14 64C30 52 52 44 84 42C128 40 164 46 188 56C200 45 214 32 226 20C222 36 218 50 216 62C219 74 224 88 228 104C214 92 202 80 188 74C164 84 128 92 84 90C52 88 30 78 14 64Z"/>`+
+ `<path d="M104 44C108 24 120 16 132 13C130 25 129 36 132 48Z"/>`+
+ `<path d="M140 48C144 30 154 23 164 21C162 32 161 41 164 52Z"/>`+
+ `<path d="M78 82C84 100 98 112 112 117C104 104 99 92 100 82Z"/>`,
+
+greenland:
+ `<path d="M14 58C16 50 26 46 42 45C100 43 156 48 188 60C190 66 190 80 188 86C156 98 100 101 42 99C26 98 16 92 14 84C10 74 10 66 14 58Z"/>`+
+ `<path d="M112 48C116 40 124 37 132 37C130 43 129 47 130 52Z"/>`+
+ `<path d="M188 60C202 54 214 46 222 36C218 48 214 58 213 66C216 74 218 82 220 92C210 84 200 78 188 86Z"/>`+
+ `<path d="M64 84C68 94 76 100 84 102C79 94 77 88 78 82Z"/>`,
+
+goblin:
+ `<path d="M4 58C4 54 8 52 14 53L52 60C56 61 56 66 52 67L14 74C8 75 4 72 4 66Z"/>`+
+ `<path d="M20 74C24 86 32 94 42 98C36 88 33 80 34 72Z"/>`+
+ `<path d="M48 60C74 52 110 48 146 48C168 49 184 54 194 62C206 52 218 40 228 30C224 44 220 56 218 66C221 76 226 88 230 102C216 92 204 80 194 74C184 80 168 84 146 84C110 84 74 80 48 72C45 68 45 64 48 60Z"/>`+
+ `<path d="M120 50C124 40 132 36 140 36C138 43 137 48 139 54Z"/>`+
+ `<path d="M78 74C82 86 92 94 102 97C95 86 92 78 93 70Z"/>`,
+
+frilled:
+ `<path d="M8 62C20 52 44 49 96 50C148 51 190 54 220 60C223 62 223 66 220 68C190 76 148 80 96 80C44 80 20 74 8 66C6 64 6 63 8 62Z"/>`+
+ `<path d="M24 52C22 58 22 72 24 78C26 72 26 58 24 52Z"/>`+
+ `<path d="M32 51C30 58 30 74 32 80C34 74 34 58 32 51Z"/>`+
+ `<path d="M40 51C38 58 38 74 40 80C42 74 42 58 40 51Z"/>`+
+ `<path d="M186 54C190 46 198 42 206 41C204 48 203 52 205 58Z"/>`+
+ `<path d="M220 58C230 54 238 48 238 42C236 52 234 60 236 70C230 74 226 70 220 68Z"/>`,
+
+dogfish:
+ `<path d="M14 64C28 56 64 52 112 52C152 52 178 56 196 62C178 70 152 74 112 74C64 74 28 72 14 64Z"/>`+
+ `<path d="M84 52C88 40 96 35 104 34C102 41 101 47 103 53Z"/>`+
+ `<path d="M84 52L92 32L95 33L88 52Z"/>`+
+ `<path d="M150 54C154 44 162 40 170 39C168 46 167 50 169 56Z"/>`+
+ `<path d="M150 54L158 36L161 37L154 55Z"/>`+
+ `<path d="M196 58C210 52 222 44 232 34C228 46 226 54 227 64C224 72 212 68 196 70Z"/>`+
+ `<path d="M58 72C62 84 72 92 82 95C76 84 73 77 74 70Z"/>`,
+
+angel:
+ `<path d="M12 62C12 55 26 51 46 51C90 50 140 54 176 60C178 63 178 71 176 74C140 80 90 84 46 83C26 83 12 79 12 72C9 69 9 65 12 62Z"/>`+
+ `<path d="M44 56C58 40 88 32 112 36C124 39 130 46 132 56C114 52 88 50 66 52C56 53 48 54 44 56Z"/>`+
+ `<path d="M44 78C58 94 88 102 112 98C124 95 130 88 132 78C114 82 88 84 66 82C56 81 48 80 44 78Z"/>`+
+ `<path d="M116 54C130 46 146 44 156 48C160 50 162 54 162 58C148 56 132 54 118 55Z"/>`+
+ `<path d="M116 80C130 88 146 90 156 86C160 84 162 80 162 76C148 78 132 80 118 79Z"/>`+
+ `<path d="M158 58C162 50 168 47 174 46C172 52 171 56 173 61Z"/>`+
+ `<path d="M176 60C190 56 202 50 212 42C208 52 206 60 207 68C204 76 190 72 176 74Z"/>`,
+
+wobbegong:
+ `<path d="M14 60C16 52 28 48 46 48C96 46 146 50 182 58C184 63 184 73 182 78C146 88 96 92 46 90C28 90 16 84 14 76C11 70 11 66 14 60Z"/>`+
+ `<path d="M14 54C10 54 7 57 6 60C10 60 13 59 15 58Z"/>`+
+ `<path d="M13 62C9 63 6 66 5 69C9 68 12 67 14 66Z"/>`+
+ `<path d="M15 70C11 72 9 76 8 79C12 77 15 75 17 73Z"/>`+
+ `<path d="M132 50C136 40 146 36 156 36C154 44 153 50 155 56Z"/>`+
+ `<path d="M182 58C196 54 208 48 218 40C214 50 212 58 213 68C210 76 198 72 182 78Z"/>`+
+ `<path d="M56 78C60 94 74 104 88 108C82 96 79 86 80 76Z"/>`,
+
+catshark:
+ `<path d="M14 64C28 56 66 52 116 52C156 52 182 56 200 62C182 70 156 74 116 74C66 74 28 72 14 64Z"/>`+
+ `<path d="M148 54C152 44 160 40 168 40C166 46 165 50 167 56Z"/>`+
+ `<path d="M174 56C178 48 184 45 190 45C188 50 187 54 188 59Z"/>`+
+ `<path d="M200 60C212 55 222 49 230 42C226 52 224 60 226 70C220 74 208 70 200 66Z"/>`+
+ `<path d="M56 72C60 84 70 92 80 94C74 84 72 77 73 70Z"/>`,
+
+cookiecutter:
+ `<path d="M46 60C52 52 72 48 100 48C132 48 156 52 172 58C156 66 132 70 100 70C72 70 52 68 46 60Z"/>`+
+ `<path d="M120 50C124 42 130 39 138 39C136 44 135 48 136 53Z"/>`+
+ `<path d="M138 52C142 46 148 43 154 43C152 48 151 52 152 57Z"/>`+
+ `<path d="M172 56C182 52 190 47 198 40C194 50 192 58 194 68C188 72 180 66 172 64Z"/>`+
+ `<path d="M76 68C80 78 88 84 96 86C90 78 88 72 88 66Z"/>`
+};
+SHARK.basking = SHARK.lamnid;
+
+const EYES = {
+  _:[[26,60]],
+  lamnid:[[24,62]], requiem:[[24,60]], hammerhead:[[14,39],[14,91]],
+  whaleshark:[[30,52]], basking:[[24,62]], megamouth:[[24,58]],
+  thresher:[[26,62]], nurse:[[26,60]], sandtiger:[[22,62]],
+  greenland:[[30,58]], goblin:[[44,60]], frilled:[[18,60]],
+  dogfish:[[24,62]], angel:[[28,60]], wobbegong:[[24,60]],
+  catshark:[[26,62]], cookiecutter:[[58,56]]
+};
+
+function silhouette(a){
+  const parts = SHARK[a] || SHARK.requiem;
+  const eyes = (EYES[a] || EYES._).map(([x,y])=>
+    `<circle cx="${x}" cy="${y}" r="3.4" fill="var(--abyss)"/>`).join("");
+  return `<svg viewBox="0 0 240 132" aria-hidden="true"><g fill="currentColor">${parts}</g>${eyes}</svg>`;
+}
+
+const EMBLEM = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 16C54 33 66 52 85 67C70 65 58 63 50 63C42 63 30 65 15 67C34 52 46 33 50 16Z" fill="currentColor"/><path d="M8 74C24 68 34 80 50 80C66 80 76 68 92 74C92 79 92 83 92 86C76 80 66 92 50 92C34 92 24 80 8 86C8 83 8 79 8 74Z" fill="currentColor" opacity=".7"/></svg>`;
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const P = {A:0, B:1};
+let G = null;
+
+function newGame(mode){
+  const d = shuffle(DECK.slice());
+  G = {
+    mode,                       // "hotseat" | "cpu"
+    hands: [d.slice(0,15), d.slice(15,30)],
+    pot: [],
+    leader: Math.random()<.5 ? 0 : 1,
+    phase: "pick",              // pick | reveal | over
+    pick: null,
+    result: null,
+    round: 1,
+    log: [], shown: null,
+    names: mode==="cpu" ? ["You","Reef AI"] : ["Player 1","Player 2"]
+  };
+  if(G.mode==="cpu" && G.leader===1) setTimeout(cpuPick, 700);
+  render();
+}
+
+function cpuScore(card, key){
+  // percentile of this card's value for this stat across the whole deck
+  const vals = DECK.map(c=>c[key]).sort((x,y)=>x-y);
+  const below = vals.filter(v=>v < card[key]).length;
+  return below/(vals.length-1);
+}
+function cpuPick(){
+  const card = G.hands[1][0];
+  const scored = STATS.map(s=>({k:s.k, v:cpuScore(card,s.k) + Math.random()*0.06}));
+  scored.sort((a,b)=>b.v-a.v);
+  choose(scored[0].k);
+}
+
+function choose(key){
+  if(!G || G.phase!=="pick") return;
+  const a = G.hands[0][0], b = G.hands[1][0];
+  const av = a[key], bv = b[key];
+  const stat = STATS.find(s=>s.k===key);
+  let outcome;
+  if(av>bv) outcome = 0; else if(bv>av) outcome = 1; else outcome = -1;
+
+  G.pick = key; G.phase = "reveal"; G.result = outcome; G.shown = [a,b];
+
+  const won = [G.hands[0].shift(), G.hands[1].shift()];
+  const spoils = G.pot.concat(G.leader===0 ? won : [won[1],won[0]]);
+  if(outcome === -1){
+    G.pot = spoils;
+  }else{
+    const ordered = outcome===0 ? [won[0],won[1]] : [won[1],won[0]];
+    G.hands[outcome].push(...G.pot, ...ordered);
+    G.pot = [];
+    G.leader = outcome;
+  }
+  G.log.push({r:G.round, o:outcome, stat:stat.label,
+              a:a.n, b:b.n, av:stat.fmt(av), bv:stat.fmt(bv), unit:stat.unit,
+              potted:outcome===-1?spoils.length:0});
+  render();
+}
+
+function next(){
+  if(!G) return;
+  G.round++;
+  if(G.hands[0].length===0 || G.hands[1].length===0 || G.round>80){ G.phase="over"; render(); return; }
+  G.phase="pick"; G.pick=null; G.result=null;
+  render();
+  if(G.mode==="cpu" && G.leader===1) setTimeout(cpuPick, 800);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const app = document.getElementById("app");
+const metaEl = document.getElementById("meta");
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const bareUnit = u => /^\//.test(u);
+
+function statRows(card, side, interactive){
+  return STATS.map((s,idx)=>{
+    const v = card[s.k];
+    let cls = "";
+    if(G.phase!=="pick" && G.pick===s.k){
+      cls = " picked";
+      if(G.result===0) cls += side===0?" win":" lose";
+      else if(G.result===1) cls += side===1?" win":" lose";
+    }
+    const inner = `<span class="key">${idx+1}</span>
+      <span class="lab">${s.label}</span>
+      <span class="val">${s.fmt(v)}<u>${s.unit}</u></span>`;
+    return interactive
+      ? `<li><button class="statrow${cls}" data-stat="${s.k}">${inner}</button></li>`
+      : `<li><div class="statrow${cls}">${inner}</div></li>`;
+  }).join("");
+}
+
+function plateHTML(card){
+  return `${silhouette(card.a)}<span class="platetag">${esc(card.n)}</span>`;
+}
+
+function cardHTML(card, side, interactive){
+  const who = G.names[side];
+  return `<article class="card ${side===0?"p1":"p2"}">
+    <div class="card-head">
+      <div class="card-owner"><b>${esc(who)}</b><span>Top card</span></div>
+      <div class="card-name">${esc(card.n)}</div>
+      <div class="card-sci">${esc(card.s)}</div>
+      <div class="chips">
+        <span class="chip">${esc(card.f)}</span>
+        <span class="chip iucn iucn-${card.i}">IUCN ${card.i}</span>
+      </div>
+    </div>
+    <div class="plate">${plateHTML(card)}</div>
+    <ul class="stats">${statRows(card, side, interactive)}</ul>
+  </article>`;
+}
+
+function backHTML(side){
+  return `<article class="card back ${side===0?"p1":"p2"}">
+    <div class="backfill">
+      <div class="emblem">${EMBLEM}</div>
+      <div class="bt">${esc(G.names[side])}</div>
+      <div class="bs">Face down</div>
+    </div>
+  </article>`;
+}
+
+function railHTML(side){
+  const n = G.hands[side].length;
+  const ticks = Array.from({length:30},(_,i)=>`<span class="tick${i<n?" on":""}"></span>`).join("");
+  const active = G.phase==="pick" && G.leader===side;
+  return `<aside class="rail ${side===0?"p1":"p2"}${active?" active":""}">
+    <div class="who">${side===0?"West reef":"East reef"}</div>
+    <div class="nm">${esc(G.names[side])}</div>
+    <div class="count">${String(n).padStart(2,"0")}</div>
+    <div class="cl">cards held</div>
+    <div class="stack">${ticks}</div>
+    <div class="turnflag">${active?"▸ Calling the stat":"Waiting"}</div>
+  </aside>`;
+}
+
+function logHTML(){
+  if(!G.log.length) return "";
+  return `<section class="log"><h3>Round log</h3><ol>${G.log.map(e=>{
+    const cls = e.o===0?"a":e.o===1?"b":"d";
+    const label = e.o===-1 ? "Draw" : G.names[e.o];
+    const tail = e.o===-1 ? ` — ${e.potted} card${e.potted===1?"":"s"} to the pot` : "";
+    return `<li><span class="r">R${e.r}</span>
+      <span>${esc(e.stat)}: <em>${esc(e.a)}</em> ${e.av}${bareUnit(e.unit)?"":" "+e.unit} vs <em>${esc(e.b)}</em> ${e.bv}${bareUnit(e.unit)?"":" "+e.unit}${tail}</span>
+      <span class="o ${cls}">${esc(label)}</span></li>`;
+  }).join("")}</ol></section>`;
+}
+
+function promptHTML(){
+  if(G.phase==="pick"){
+    const l = G.leader;
+    const cpuTurn = G.mode==="cpu" && l===1;
+    return `<div class="prompt ${l===1?"teal":""}">
+      <div>
+        <div class="msg"><b class="${l===1?"t":""}">${esc(G.names[l])}</b> ${cpuTurn?"is choosing a stat…":"— call your strongest stat"}</div>
+        <div class="hint">${cpuTurn?"The AI ranks its shark against the whole deck.":"Click a stat on your card, or press 1–6. Highest value wins both cards."}</div>
+      </div>
+      ${G.pot.length?`<div class="pot">Pot: ${G.pot.length} cards</div>`:""}
+    </div>`;
+  }
+  const stat = STATS.find(s=>s.k===G.pick);
+  let cls, msg;
+  if(G.result===-1){ cls="draw"; msg=`Dead heat on ${stat.label} — ${G.pot.length} cards to the pot`; }
+  else { cls = G.result===0?"win":"lose"; msg = `<b class="${G.result===1?"t":""}">${esc(G.names[G.result])}</b> takes it on ${stat.label}`; }
+  return `<div class="prompt ${cls}">
+    <div><div class="msg">${msg}</div>
+    <div class="hint">${G.result===-1?"Both cards ride on the next round.":"Winner leads the next round."}</div></div>
+    <button class="btn nextBtn">Next round →</button>
+  </div>`;
+}
+
+function menu(){
+  metaEl.innerHTML = "";
+  const rows = STATS.map(s=>{
+    const hi = DECK.reduce((a,b)=>b[s.k]>a[s.k]?b:a);
+    return `<div class="legend-row"><span>${s.label}</span><span>max ${s.fmt(hi[s.k])} ${s.unit} · ${hi.n}</span></div>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="menu">
+    <div>
+      <h2 class="menu-lede">Thirty sharks. Six numbers each. One of you swims off with the whole deck.</h2>
+      <p>Every card carries a real shark and its field figures — from the 50&nbsp;cm Cookiecutter Shark to the 12&nbsp;m Whale Shark. The deck is split down the middle and dealt face down. You only ever see your own top card.</p>
+      <ol class="rules">
+        <li><span class="n">01</span><span><b>Call a stat.</b> Whoever leads picks one of the six numbers on their top card.</span></li>
+        <li><span class="n">02</span><span><b>Both cards flip.</b> Higher number wins — Danger and Rarity included, no reversed stats.</span></li>
+        <li><span class="n">03</span><span><b>Winner takes both</b> to the bottom of their pile and leads the next round.</span></li>
+        <li><span class="n">04</span><span><b>A tie feeds the pot.</b> Tied cards sit out; the next winner sweeps them up.</span></li>
+        <li><span class="n">05</span><span><b>Take all 30 cards to win.</b> If nobody has by round 80, the bigger pile takes it.</span></li>
+      </ol>
+      <div class="legend">
+        <h3>The six stats · deck leaders</h3>
+        <div class="legend-grid">${rows}</div>
+      </div>
+    </div>
+    <div>
+      <div class="modes">
+        <button class="mode" data-mode="hotseat">
+          <span class="go">Deal →</span>
+          <div class="t">Pass and play</div>
+          <div class="d">Two people, one screen. Hand it over when the lead changes — each card is only ever shown to the player holding it.</div>
+        </button>
+        <button class="mode" data-mode="cpu">
+          <span class="go">Deal →</span>
+          <div class="t">You vs Reef AI</div>
+          <div class="d">The computer ranks its shark against all 30 cards and calls whichever stat sits highest in the deck.</div>
+        </button>
+      </div>
+      <div class="legend">
+        <h3>Sources &amp; caveats</h3>
+        <div class="legend-row"><span>Length, weight</span><span>typical adult maximum</span></div>
+        <div class="legend-row"><span>Top speed</span><span>burst, not cruising pace</span></div>
+        <div class="legend-row"><span>Danger</span><span>recorded risk to humans, 1–5</span></div>
+        <div class="legend-row"><span>Rarity Index</span><span>IUCN status + range size</span></div>
+        <p style="font-size:12.5px;margin-top:12px">Figures are rounded field-guide values chosen to play well, not to settle arguments. Lengths include the tail — a thresher gets about half of its from that upper lobe. All card art is stylised silhouettes grouped by body plan (mackerel sharks, requiem sharks, hammerheads, carpet sharks and so on).</p>
+      </div>
+    </div>
+  </div>`;
+  app.querySelectorAll(".mode").forEach(b=>b.onclick=()=>newGame(b.dataset.mode));
+}
+
+function render(){
+  if(!G){ menu(); return; }
+  metaEl.innerHTML = `
+    <div class="meta-cell"><div class="k">Round</div><div class="v">${String(G.round).padStart(2,"0")}</div></div>
+    <div class="meta-cell"><div class="k">Pot</div><div class="v">${String(G.pot.length).padStart(2,"0")}</div></div>
+    <div class="meta-cell"><div class="k">Mode</div><div class="v" style="font-size:13px">${G.mode==="cpu"?"vs AI":"2P"}</div></div>`;
+
+  if(G.phase==="over"){
+    const w = G.hands[0].length > G.hands[1].length ? 0 : G.hands[1].length > G.hands[0].length ? 1 : -1;
+    app.innerHTML = `<div class="over">
+      <div class="crest">${EMBLEM}</div>
+      <h2>${w===-1?"Stalemate":esc(G.names[w])+" takes the deck"}</h2>
+      <p>${w===-1?"Eighty rounds, dead level.":`Final count ${G.hands[0].length} – ${G.hands[1].length} after ${G.round-1} rounds.`}</p>
+      <div class="actions">
+        <button class="btn" id="again">Deal again</button>
+        <button class="btn ghost" id="back">Back to menu</button>
+      </div>
+    </div>${logHTML()}`;
+    document.getElementById("again").onclick=()=>newGame(G.mode);
+    document.getElementById("back").onclick=()=>{G=null;render();};
+    return;
+  }
+
+  const l = G.leader;
+  const showBoth = G.phase!=="pick";
+  const face = side => showBoth ? G.shown[side] : G.hands[side][0];
+  const leftCard  = (showBoth || l===0) ? cardHTML(face(0),0, G.phase==="pick" && l===0) : backHTML(0);
+  const rightCard = (showBoth || l===1) ? cardHTML(face(1),1, G.phase==="pick" && l===1 && G.mode!=="cpu") : backHTML(1);
+  const prompt = promptHTML();
+
+  app.innerHTML = `<div class="table">
+    <div class="railcol">${railHTML(0)}${prompt}</div>
+    <div class="arena">${leftCard}${rightCard}</div>
+    <div class="railcol">${railHTML(1)}${prompt}</div>
+  </div>
+  ${logHTML()}`;
+
+  app.querySelectorAll("button.statrow").forEach(b=>b.onclick=()=>choose(b.dataset.stat));
+  app.querySelectorAll("button.nextBtn").forEach(b=>b.onclick=next);
+}
+
+document.addEventListener("keydown", e=>{
+  if(!G) return;
+  if(G.phase==="reveal" && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); next(); return; }
+  if(G.phase!=="pick") return;
+  if(G.mode==="cpu" && G.leader===1) return;
+  const i = parseInt(e.key,10);
+  if(i>=1 && i<=6) choose(STATS[i-1].k);
+});
+
+render();
+</script>
+
+</body>
+</html>
