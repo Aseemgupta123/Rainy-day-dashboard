@@ -123,6 +123,18 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 }
 .card.p1{border-top:3px solid var(--iris)}
 .card.p2{border-top:3px solid var(--teal)}
+.card.won{animation:card-lift 2.6s both;
+  box-shadow:0 0 0 2px var(--moss),0 26px 52px -18px rgba(127,176,105,.5),var(--shadow)}
+@keyframes card-lift{
+  0%{transform:none;animation-timing-function:cubic-bezier(.2,.7,.3,1)}
+  20%{transform:translateY(-18px) scale(1.02);animation-timing-function:cubic-bezier(.45,0,.25,1)}
+  100%{transform:none}
+}
+.plate .ribbon{position:absolute;top:26px;right:-44px;width:170px;z-index:2;transform:rotate(45deg);
+  background:var(--moss);color:#132010;text-align:center;padding:6px 0;
+  font:600 12px/1 "IBM Plex Mono",monospace;letter-spacing:.24em;text-transform:uppercase;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);animation:ribbon-in .6s ease-out .5s both}
+@keyframes ribbon-in{from{opacity:0;transform:rotate(45deg) translateY(-18px)}to{opacity:1;transform:rotate(45deg)}}
 .card-head{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
 .card-owner{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash-dim);display:flex;justify-content:space-between}
 .card.p1 .card-owner b{color:var(--iris);font-weight:500}
@@ -440,7 +452,8 @@ function plateHTML(card){
 
 function cardHTML(card, side, interactive){
   const who = G.names[side];
-  return `<article class="card ${side===0?"p1":"p2"}">
+  const res = G.phase==="reveal" && G.result===side ? " won" : "";
+  return `<article class="card ${side===0?"p1":"p2"}${res}">
     <div class="card-head">
       <div class="card-owner"><b>${esc(who)}</b><span>Top card</span></div>
       <div class="card-name">${esc(card.n)}</div>
@@ -451,7 +464,7 @@ function cardHTML(card, side, interactive){
         <span class="chip">${esc(card.f)}</span>
       </div>
     </div>
-    <div class="plate">${plateHTML(card)}</div>
+    <div class="plate">${plateHTML(card)}${res ? `<span class="ribbon">Winner</span>` : ""}</div>
     <ul class="stats">${statRows(card, side, interactive)}</ul>
   </article>`;
 }
